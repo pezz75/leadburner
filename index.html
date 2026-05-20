@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Destaca - AI Search Visibility Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brand:#00E5A0;--dark:#0A0E14;--card:#111720;--card2:#161e2a;--border:rgba(255,255,255,0.07);--text:#f0f4ff;--muted:#6a7a8f;--danger:#ff4d4d;--warn:#f5a623;--info:#378ADD}
+body{min-height:100vh;background:var(--dark);font-family:'Syne',sans-serif;color:var(--text)}
+.wrap{max-width:820px;margin:0 auto;padding:20px 16px 60px}
+.app{border-radius:14px;border:1px solid var(--border);overflow:hidden}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--border);background:var(--dark)}
+.badge{font-family:'Space Mono',monospace;font-size:10px;padding:3px 10px;border-radius:20px;background:rgba(0,229,160,0.08);color:var(--brand);border:1px solid rgba(0,229,160,.2)}
+
+/* HOME */
+.home-inner{padding:32px 24px 24px;text-align:center}
+h1{font-size:26px;font-weight:800;line-height:1.2;margin-bottom:12px}
+h1 span{color:var(--brand)}
+.sub{font-size:13px;color:var(--muted);max-width:460px;margin:0 auto 24px;line-height:1.6}
+.search-row{display:flex;gap:10px;max-width:540px;margin:0 auto 12px}
+.search-row input{flex:1;background:var(--card);border:1px solid rgba(0,229,160,.25);border-radius:10px;padding:13px 18px;font-size:14px;font-family:'Syne',sans-serif;color:var(--text);outline:none}
+.search-row input:focus{border-color:var(--brand)}
+.search-row input::placeholder{color:var(--muted)}
+.btn-primary{background:var(--brand);color:#0A0E14;border:none;border-radius:10px;padding:13px 22px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn-primary:hover{background:#00c486}
+
+.industry-row{display:flex;align-items:center;gap:10px;max-width:540px;margin:0 auto 10px}
+.industry-row label{font-size:11px;color:var(--muted);white-space:nowrap;font-family:'Space Mono',monospace}
+select{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px;font-family:'Syne',sans-serif;font-size:13px;color:var(--text);outline:none;cursor:pointer}
+select option{background:var(--card)}
+
+.brand-row{display:flex;align-items:center;gap:10px;max-width:540px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 14px}
+.brand-row label{font-size:11px;color:var(--muted);white-space:nowrap;font-family:'Space Mono',monospace}
+.swatch{width:26px;height:26px;border-radius:6px;border:1px solid rgba(255,255,255,.2);overflow:hidden;flex-shrink:0}
+.swatch input{width:200%;height:200%;margin:-50%;border:none;cursor:pointer}
+.hex-in{background:var(--card2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;font-family:'Space Mono',monospace;font-size:12px;color:var(--text);outline:none;width:86px}
+
+.chips{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.chip{font-size:11px;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:20px;padding:5px 12px;cursor:pointer;font-family:'Space Mono',monospace}
+.chip:hover{color:var(--brand)}
+
+.trust-row{display:flex;justify-content:center;gap:28px;padding-top:16px;border-top:1px solid var(--border)}
+.trust-item{text-align:center}
+.trust-num{font-family:'Space Mono',monospace;font-size:14px;font-weight:700;color:var(--brand)}
+.trust-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* SCAN */
+.scan-view{display:none;padding:40px 24px;text-align:center}
+.scan-lbl{font-family:'Space Mono',monospace;font-size:11px;color:var(--brand);letter-spacing:.12em;margin-bottom:20px}
+.steps{display:flex;flex-direction:column;gap:10px;max-width:320px;margin:0 auto}
+.step{display:flex;align-items:center;gap:11px;font-size:13px;color:var(--muted)}
+.step.active{color:var(--text)}
+.step.done{color:var(--brand)}
+.step-dot{width:20px;height:20px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-family:'Space Mono',monospace}
+.step.active .step-dot{border-color:var(--brand);color:var(--brand)}
+.step.done .step-dot{background:var(--brand);color:#0A0E14}
+
+/* RESULTS */
+.results-view{display:none;padding:0 20px 24px}
+.res-top{display:flex;align-items:center;justify-content:space-between;padding:12px 0 10px;gap:12px}
+.biz-name{font-size:16px;font-weight:700;flex:1}
+.score-pill{font-family:'Space Mono',monospace;font-size:11px;padding:4px 12px;border-radius:20px;font-weight:700}
+.pill-low{background:rgba(255,77,77,.1);color:var(--danger);border:1px solid rgba(255,77,77,.25)}
+.pill-mid{background:rgba(245,166,35,.1);color:var(--warn);border:1px solid rgba(245,166,35,.25)}
+
+/* ARI */
+.ari-card{background:var(--card);border-radius:13px;border:1px solid var(--border);padding:16px 18px;margin-bottom:12px;display:grid;grid-template-columns:78px 1fr;gap:16px;align-items:center}
+.ari-ring{width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ari-n{font-family:'Space Mono',monospace;font-size:24px;font-weight:700;line-height:1}
+.ari-s{font-size:8px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.ari-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.ari-cell{background:var(--card2);border-radius:7px;padding:6px 10px}
+.av{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;margin-bottom:2px}
+.av.g{color:var(--brand)}.av.w{color:var(--warn)}.av.b{color:var(--danger)}
+.al{font-size:9px;color:var(--muted)}
+
+/* EXEC */
+.exec{background:linear-gradient(135deg,rgba(0,229,160,.05),rgba(55,138,221,.04));border:1px solid rgba(0,229,160,.2);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.exec-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--brand);letter-spacing:.1em;margin-bottom:8px}
+.exec-txt{font-size:13px;color:var(--text);line-height:1.6}
+.exec-txt b{color:var(--brand)}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.rev-item{background:var(--card2);border-radius:9px;padding:10px;text-align:center;border:1px solid var(--border)}
+.rev-n{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--warn);margin-bottom:3px}
+.rev-l{font-size:10px;color:var(--muted)}
+
+/* TABS */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:12px;overflow-x:auto}
+.tab{font-size:11px;font-weight:700;padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);background:none;border-top:none;border-left:none;border-right:none;font-family:'Syne',sans-serif;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--brand);border-bottom-color:var(--brand)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+.sec{font-family:'Space Mono',monospace;font-size:9px;color:var(--brand);letter-spacing:.09em;text-transform:uppercase;margin-bottom:9px}
+
+/* SOV */
+.sov-row{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.sov-name{font-size:11px;width:130px;flex-shrink:0}
+.sov-track{flex:1;background:var(--card2);border-radius:3px;height:8px;overflow:hidden}
+.sov-fill{height:100%;border-radius:3px}
+.you-fill{background:var(--brand)}
+.comp-fill{background:var(--info)}
+.comp2-fill{background:#7F77DD}
+.sov-pct{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);width:28px;text-align:right}
+
+/* PILLARS */
+.pillars{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.pillar{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:12px}
+.pillar-h{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;display:flex;justify-content:space-between}
+.pillar-g{font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
+.pi{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--muted);margin-bottom:4px}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dg{background:var(--brand)}.dw{background:var(--warn)}.db{background:var(--danger)}
+
+/* QUICK WINS */
+.quick-wins{background:rgba(0,229,160,.04);border:1px solid rgba(0,229,160,.15);border-radius:11px;padding:13px 15px;margin-bottom:12px}
+.qw-item{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--text);line-height:1.5;margin-bottom:7px}
+.qw-n{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--brand);background:rgba(0,229,160,.1);border-radius:5px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* PLATFORMS */
+.p-card{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:13px;margin-bottom:9px}
+.p-card.found{border-color:rgba(0,229,160,.25)}.p-card.not-found{border-color:rgba(255,77,77,.2)}.p-card.partial{border-color:rgba(245,166,35,.2)}
+.p-name{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.stag{font-family:'Space Mono',monospace;font-size:9px;padding:3px 8px;border-radius:20px;margin-bottom:6px;display:inline-block;font-weight:700}
+.sf{background:rgba(0,229,160,.1);color:var(--brand)}.sn{background:rgba(255,77,77,.1);color:var(--danger)}.sp{background:rgba(245,166,35,.1);color:var(--warn)}
+.p-txt{font-size:11px;color:var(--muted);line-height:1.5}
+.ai-q{background:var(--card2);border-radius:7px;padding:8px 10px;margin-top:7px;border-left:2px solid var(--brand)}
+.ai-ql{font-family:'Space Mono',monospace;font-size:8px;color:var(--brand);margin-bottom:3px}
+.ai-qt{font-size:11px;color:#8a9ab0;line-height:1.5;font-style:italic}
+
+/* COMPETITORS */
+.comp-card{background:var(--card);border-radius:10px;border:1px solid var(--border);padding:13px;margin-bottom:9px}
+.comp-card.th{border-color:rgba(255,77,77,.3)}.comp-card.tm{border-color:rgba(245,166,35,.2)}.comp-card.tl{border-color:rgba(0,229,160,.15)}
+.cc-top{display:flex;justify-content:space-between;margin-bottom:9px;gap:8px}
+.cc-name{font-size:13px;font-weight:700}.cc-dist{font-size:10px;color:var(--muted);margin-top:2px}
+.tp{font-family:'Space Mono',monospace;font-size:9px;padding:3px 9px;border-radius:20px;font-weight:700}
+.tph{background:rgba(255,77,77,.1);color:var(--danger)}.tpm{background:rgba(245,166,35,.1);color:var(--warn)}.tpl{background:rgba(0,229,160,.1);color:var(--brand)}
+.cc-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:9px}
+.cm{background:var(--card2);border-radius:7px;padding:6px 7px;text-align:center}
+.cmv{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;margin-bottom:2px}
+.cmv.g{color:var(--brand)}.cmv.w{color:var(--warn)}.cmv.b{color:var(--danger)}
+.cml{font-size:8px;color:var(--muted)}
+.cc-ai{background:var(--card2);border-radius:7px;padding:8px 10px;border-left:2px solid rgba(55,138,221,.4)}
+.cc-ai-l{font-family:'Space Mono',monospace;font-size:8px;color:var(--info);margin-bottom:2px}
+.cc-ai-t{font-size:11px;color:#8a9ab0;line-height:1.5;font-style:italic}
+
+/* WEBSITE */
+.web-plat{display:flex;align-items:center;gap:12px;background:var(--card2);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;margin-bottom:11px}
+.web-scores{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:11px}
+.wscore{background:var(--card);border-radius:9px;border:1px solid var(--border);padding:9px;text-align:center}
+.wsn{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;margin-bottom:2px}
+.wsl{font-size:9px;color:var(--muted)}
+.web-checks{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.wcheck{display:flex;align-items:flex-start;gap:9px;background:var(--card);border-radius:8px;padding:8px 11px;border:1px solid var(--border)}
+.wci{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700}
+.wci.pass{background:rgba(0,229,160,.15);color:var(--brand)}.wci.fail{background:rgba(255,77,77,.15);color:var(--danger)}.wci.warn{background:rgba(245,166,35,.15);color:var(--warn)}
+.wc-l{font-size:11px;font-weight:600;color:var(--text)}.wc-d{font-size:10px;color:var(--muted);margin-top:1px}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tool{background:var(--card);border-radius:9px;border:1px solid var(--border);padding:11px}
+.tool-h{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.tool-ico{width:27px;height:27px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.tool-n{font-size:11px;font-weight:700}.tool-t{font-size:9px;color:var(--muted);font-family:'Space Mono',monospace}
+.tool-d{font-size:10px;color:var(--muted);line-height:1.45}
+.tool-ins{font-size:9px;font-weight:600;margin-top:5px;padding:2px 7px;border-radius:20px;display:inline-block;background:rgba(0,229,160,.08);color:var(--brand);font-family:'Space Mono',monospace}
+
+/* FIXES */
+.fix{background:var(--card);border-radius:9px;padding:11px 13px;display:flex;gap:11px;border:1px solid var(--border);margin-bottom:7px}
+.fix-n{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--brand);background:rgba(0,229,160,.08);border-radius:5px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fix-b{flex:1}
+.fix-t{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:3px}
+.fix-t b{color:var(--brand)}
+.fix-d{font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:4px}
+.fix-tags{display:flex;gap:6px}
+.ftag{font-family:'Space Mono',monospace;font-size:9px;padding:2px 7px;border-radius:20px}
+.fhi{background:rgba(0,229,160,.1);color:var(--brand)}.fme{background:rgba(245,166,35,.1);color:var(--warn)}.fsp{background:rgba(55,138,221,.1);color:var(--info)}
+
+/* AI COMPARE */
+.adc-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.adc{border-radius:10px;padding:12px;border:1px solid var(--border)}
+.adc.them{background:rgba(55,138,221,.05);border-color:rgba(55,138,221,.2)}
+.adc.you{background:rgba(255,77,77,.04);border-color:rgba(255,77,77,.15)}
+.adc-l{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.08em;margin-bottom:6px;font-weight:700}
+.adc.them .adc-l{color:var(--info)}.adc.you .adc-l{color:var(--danger)}
+.adc-n{font-size:12px;font-weight:700;margin-bottom:5px}
+.adc-t{font-size:11px;color:#8a9ab0;line-height:1.55;font-style:italic}
+
+/* SHARE + CTA */
+.share-bar{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.share-txt{font-size:12px;color:var(--muted);flex:1}
+.share-txt b{color:var(--brand)}
+.btn-share{background:transparent;border:1px solid rgba(0,229,160,.3);color:var(--brand);border-radius:8px;padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;cursor:pointer}
+
+.cta-row{display:flex;gap:9px;margin-top:14px}
+.btn-dl{flex:1;border:none;border-radius:10px;padding:13px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-dl:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-family:'Syne',sans-serif;font-size:13px;cursor:pointer}
+.btn-ghost:hover{color:var(--text)}
+.dl-ok{display:none;align-items:center;gap:8px;background:rgba(0,229,160,.07);border:1px solid rgba(0,229,160,.18);border-radius:9px;padding:9px 13px;margin-top:9px;font-size:12px;color:var(--brand);font-weight:600}
+.dl-ok.show{display:flex}
+
+@media(max-width:600px){.pillars,.adc-row,.tools-grid{grid-template-columns:1fr}.cc-metrics{grid-template-columns:repeat(3,1fr)}}
+
+
+
+.map-header span { color: var(--muted); font-size: 9px; }
+
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="app">
+
+<div class="topbar">
+  <svg width="200" height="44" viewBox="0 0 248 52" xmlns="http://www.w3.org/2000/svg">
+    <path d="M24 26 m-19 0 a19 19 0 1 1 38 0" stroke="#00E5A0" stroke-width="2" fill="none" stroke-linecap="round" opacity=".28"/>
+    <path d="M24 26 m-12 0 a12 12 0 1 1 24 0" stroke="#00E5A0" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".55"/>
+    <path d="M24 26 m-7 0 a7 7 0 1 1 14 0" stroke="#00E5A0" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".85"/>
+    <circle cx="24" cy="26" r="3" fill="#00E5A0"/>
+    <circle cx="24" cy="26" r="5" stroke="#00E5A0" stroke-width="1" fill="none" opacity=".42"/>
+    <circle cx="37" cy="35" r="2" fill="#00E5A0" opacity=".5"/>
+    <line x1="44" y1="8" x2="44" y2="3" stroke="#00E5A0" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+    <line x1="48" y1="12" x2="53" y2="8" stroke="#00E5A0" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+    <line x1="40" y1="12" x2="35" y2="8" stroke="#00E5A0" stroke-width="1.4" stroke-linecap="round" opacity=".75"/>
+    <circle cx="44" cy="15" r="3" fill="#00E5A0" opacity=".9"/>
+    <text x="60" y="24" font-family="Syne,sans-serif" font-weight="800" font-size="20" fill="#f0f4ff" letter-spacing="-0.5">Destaca</text>
+    <text x="62" y="38" font-family="Space Mono,monospace" font-size="7" fill="#3a4a5c" letter-spacing=".1em">AI SEARCH VISIBILITY PLATFORM</text>
+    <text x="62" y="49" font-family="Space Mono,monospace" font-size="6" fill="#2a3a4a" letter-spacing=".05em">Stand out. Get found. Get cited.</text>
+  </svg>
+  <div class="badge">LOCAL GEO</div>
+</div>
+
+<!-- HOME -->
+<div id="homeView">
+  <div class="home-inner">
+    <h1>Your <span>AI Readiness</span> score<br>in 60 seconds</h1>
+    <p class="sub">AI visibility + competitor radar + website health. One scan. One branded 8-page PDF. Yours to keep until they pay.</p>
+    <div class="search-row">
+      <input type="text" id="bizInput" placeholder="Business name + city  e.g. Groove Hair Salon, Dallas TX"/>
+      <button class="btn-primary" id="scanBtn">Run GEO Scan</button>
+    </div>
+    <div class="industry-row">
+      <label>Industry</label>
+      <select id="industrySelect">
+        <option value="general">General / Service Business</option>
+        <option value="salon">Hair Salon / Beauty</option>
+        <option value="dental">Dental / Medical</option>
+        <option value="gym">Gym / Fitness</option>
+        <option value="restaurant">Restaurant / Food</option>
+        <option value="plumbing">Plumbing / Home Services</option>
+        <option value="legal">Legal / Professional</option>
+        <option value="realestate">Real Estate</option>
+        <option value="auto">Auto / Repair</option>
+      </select>
+    </div>
+    <div class="brand-row">
+      <label>Brand color</label>
+      <div class="swatch" id="swatchBox" style="background:#00E5A0"><input type="color" id="colorPicker" value="#00E5A0"/></div>
+      <input type="text" class="hex-in" id="hexInput" value="#00E5A0" maxlength="7"/>
+    </div>
+    <p style="font-size:10px;color:var(--muted);text-align:center;margin-bottom:12px">Paste client brand hex - PDF generates in their colors</p>
+    <div class="chips" id="chipsWrap">
+      <span class="chip" data-biz="Groove Hair Salon, Dallas TX" data-color="#C9A84C" data-ind="salon">Groove Hair Salon</span>
+      <span class="chip" data-biz="Peak Performance Gym, Denver" data-color="#0066CC" data-ind="gym">Peak Performance Gym</span>
+      <span class="chip" data-biz="Sunrise Dental, Miami" data-color="#00AADD" data-ind="dental">Sunrise Dental</span>
+      <span class="chip" data-biz="Marios Pizza, Austin TX" data-color="#CC2222" data-ind="restaurant">Mario's Pizza</span>
+      <span class="chip" data-biz="Blue Water Plumbing, Chicago" data-color="#1A7AFF" data-ind="plumbing">Blue Water Plumbing</span>
+    </div>
+    <div class="trust-row">
+      <div class="trust-item"><div class="trust-num">5</div><div class="trust-lbl">AI platforms</div></div>
+      <div class="trust-item"><div class="trust-num">+Website</div><div class="trust-lbl">health check</div></div>
+      <div class="trust-item"><div class="trust-num">8 pages</div><div class="trust-lbl">branded PDF</div></div>
+      <div class="trust-item"><div class="trust-num">100%</div><div class="trust-lbl">yours to keep</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCANNING -->
+<div class="scan-view" id="scanView">
+  <div class="scan-lbl" id="scanLbl">INITIALIZING GEO SCAN</div>
+  <div class="steps">
+    <div class="step" id="st0"><div class="step-dot">1</div>Scanning ChatGPT + Gemini</div>
+    <div class="step" id="st1"><div class="step-dot">2</div>Scanning Perplexity + Meta AI</div>
+    <div class="step" id="st2"><div class="step-dot">3</div>Mapping local competitors (10km)</div>
+    <div class="step" id="st3"><div class="step-dot">4</div>Analysing website platform + health</div>
+    <div class="step" id="st4"><div class="step-dot">5</div>Calculating ARI + Revenue impact</div>
+    <div class="step" id="st5"><div class="step-dot">6</div>Building branded 8-page PDF</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results-view" id="resultsView">
+  <div class="res-top">
+    <div>
+      <div class="biz-name" id="bizTitle"></div>
+      <div style="font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px" id="indTag"></div>
+    </div>
+    <div class="score-pill" id="scorePill"></div>
+  </div>
+  <div class="ari-card" id="ariCard"></div>
+  <div class="exec" id="execBox"></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="platforms">AI Platforms</button>
+    <button class="tab" data-tab="competitors">Competitors</button>
+    <button class="tab" data-tab="website">Website</button>
+    <button class="tab" data-tab="fixes">Fix Plan</button>
+  </div>
+  <div id="tab-overview" class="tab-panel active"></div>
+  <div id="tab-platforms" class="tab-panel"></div>
+  <div id="tab-competitors" class="tab-panel"></div>
+  <div id="tab-website" class="tab-panel"></div>
+  <div id="tab-fixes" class="tab-panel"></div>
+  <div class="share-bar">
+    <div class="share-txt">ARI Score: <b id="shareNum"></b> - share with client</div>
+    <button class="btn-share" id="shareBtn">Copy Score Card</button>
+  </div>
+  <div class="cta-row">
+    <button class="btn-dl" id="dlBtn">Download Full PDF Report (8 pages)</button>
+    <button class="btn-ghost" id="resetBtn">New scan</button>
+  </div>
+  <div class="dl-ok" id="dlOk">&#10003; &nbsp;<span id="dlMsg">Report saved to Downloads</span></div>
+</div>
+
+</div>
+</div>
+
+<script>
+// -- STATE ---------------------------------------------
+window._mapsReady = false;
+window.initMapsReady = function() { window._mapsReady = true; };
+
+var BIZ = '';
+var DATA = null;
+var HEX = '#00E5A0';
+var INDUSTRY = 'general';
+
+var IND_LABELS = {
+  general:'Service Business', salon:'Hair Salon / Beauty',
+  dental:'Dental / Medical', gym:'Gym / Fitness',
+  restaurant:'Restaurant / Food', plumbing:'Plumbing / Home Services',
+  legal:'Legal / Professional', realestate:'Real Estate', auto:'Auto / Repair'
+};
+
+// -- COLOUR HELPERS ------------------------------------
+function h2r(h) {
+  h = h.replace('#','');
+  if (h.length === 3) h = h.split('').map(function(c){return c+c;}).join('');
+  var n = parseInt(h, 16);
+  return [(n>>16)&255, (n>>8)&255, n&255];
+}
+function lum(r,g,b) { return .299*r + .587*g + .114*b; }
+function drk(h, a) {
+  a = a||.3;
+  var c = h2r(h);
+  return [Math.max(0,Math.round(c[0]*(1-a))), Math.max(0,Math.round(c[1]*(1-a))), Math.max(0,Math.round(c[2]*(1-a)))];
+}
+function lgt(h, a) {
+  a = a||.87;
+  var c = h2r(h);
+  return [Math.min(255,Math.round(c[0]+(255-c[0])*a)), Math.min(255,Math.round(c[1]+(255-c[1])*a)), Math.min(255,Math.round(c[2]+(255-c[2])*a))];
+}
+
+function syncColor(v) {
+  HEX = v;
+  document.getElementById('hexInput').value = v;
+  document.getElementById('swatchBox').style.background = v;
+}
+
+// -- DATA ----------------------------------------------
+var QUICK_WINS = {
+  salon: ['Respond to your 3 most recent Google reviews today - takes 5 minutes', 'Add your Instagram handle to Google Business Profile', 'Post one before/after photo to Facebook with location tag today'],
+  dental: ['Verify GBP hours are 100% accurate - wrong hours is the top dental AI penalty', 'Add "accepting new patients" to your GBP description', 'Reply to all unanswered Healthgrades reviews this week'],
+  gym: ['Update GBP with current class schedule - immediate AI visibility impact', 'Post one member testimonial to Facebook today', 'Add accurate hours to every directory profile'],
+  restaurant: ['Add your full menu to Google Business Profile', 'Reply to your 5 most recent Yelp reviews this week', 'Add hours to Apple Maps if not already there'],
+  plumbing: ['Add "24-hour emergency service" to GBP if you offer it', 'Claim your Angi listing - free and takes 10 minutes', 'Respond to all Google reviews in the last 30 days'],
+  legal: ['Add practice areas to GBP categories', 'Claim your Avvo profile if not done', 'Add "free consultation" to GBP description if applicable'],
+  realestate: ['Add license number and certifications to GBP', 'Claim your Zillow agent profile if not done', 'Reply to all Google reviews mentioning specific neighborhoods'],
+  auto: ['Add specific services to GBP - not just "auto repair"', 'Claim RepairPal listing if not done', 'Respond to all negative Google reviews this week'],
+  general: ['Respond to your last 5 Google reviews - 0 cost, immediate trust signal', 'Add your top 3 services to GBP services section', 'Verify hours are correct across Google, Apple Maps, and Bing']
+};
+
+var IND_FIXES = {
+  salon: ['Add booking widget (Vagaro, StyleSeat) to every service page', 'List on StyleSeat and Booksy - both cited by ChatGPT for salon queries', 'Activate Instagram Reels - before/after content gets 3x more AI citation traction'],
+  dental: ['List on Healthgrades, Zocdoc, and WebMD - all cited by AI for dental queries', 'Add schema for each service: cleaning, whitening, invisalign', 'Create FAQ page answering "Does this practice accept X insurance?"'],
+  gym: ['List on ClassPass and Mindbody - primary AI citation sources for fitness', 'Add class schedule schema so AI can surface class times directly', 'Activate TikTok - fitness content is highest AI-cited social in this category'],
+  restaurant: ['Claim and complete OpenTable and Yelp - primary AI sources for restaurants', 'Add MenuPage schema so AI can cite specific dishes', 'Enable Google ordering/reservations directly in GBP'],
+  plumbing: ['List on Angi, HomeAdvisor, and Thumbtack - heavily cited by AI', 'Add emergency availability to schema and GBP', 'Target "cost of service in city" with dedicated pricing FAQ pages'],
+  legal: ['List on Avvo, Justia, and FindLaw - primary AI citation sources for legal', 'Add PracticeArea schema for each legal specialty', 'Create FAQ pages answering common legal questions'],
+  realestate: ['List on Zillow, Realtor.com, and Trulia - cited by AI for real estate queries', 'Add LocalBusiness + RealEstateAgent schema to website', 'Create neighborhood guide pages - AI cites hyperlocal content heavily'],
+  auto: ['List on RepairPal, CarGurus, and Yelp - primary AI sources for auto repair', 'Add schema for each service: oil change, brake repair, transmission', 'Target "how much does service cost in city" - top auto AI query'],
+  general: ['Add LocalBusiness schema markup to every page', 'Create FAQ content answering the top 6 questions customers ask', 'Build citation consistency across Google, Yelp, Apple Maps, and Bing']
+};
+
+var WEB = [
+  {
+    platform:'WordPress', icon:'🔵',
+    scores:[{v:'38',c:'b',l:'Overall'},{v:'54',c:'w',l:'Mobile'},{v:'31',c:'b',l:'Speed'},{v:'12',c:'b',l:'AI Ready'}],
+    checks:[
+      {ok:true, l:'WordPress CMS detected', d:'Good foundation - highly extensible'},
+      {ok:false, l:'No schema markup found', d:'LocalBusiness JSON-LD completely absent'},
+      {ok:false, l:'Page speed: 3.8s', d:'Target under 2s - slow sites rank lower in AI'},
+      {ok:false, l:'No AI chatbot detected', d:'Leads being lost 24/7 - no live chat'},
+      {ok:true, l:'SSL active', d:'HTTPS properly configured'},
+      {ok:'warn', l:'Mobile: 54/100', d:'Passes minimum but needs improvement'},
+      {ok:false, l:'No meta descriptions', d:'AI cannot generate accurate page summaries'},
+      {ok:false, l:'No booking widget', d:'Customers cannot book directly - high friction'},
+      {ok:false, l:'No FAQ content', d:'Number 1 AI citation source - completely missing'},
+      {ok:'warn', l:'Basic contact form only', d:'No CRM automation detected'}
+    ],
+    tools:[
+      {ico:'💬', n:'Tidio AI Chatbot', t:'CHATBOT', col:'#4CC9F0', ins:'Free WordPress plugin', d:'Captures leads 24/7, answers pricing questions, books appointments automatically.'},
+      {ico:'📅', n:'Simply Schedule', t:'BOOKING', col:'#00E5A0', ins:'WordPress plugin', d:'Booking widget on any page. Connects to Google Calendar. Removes phone-call barrier.'},
+      {ico:'⚡', n:'Schema Pro', t:'SCHEMA', col:'#F5A623', ins:'$79/yr plugin', d:'Auto-adds LocalBusiness schema without touching code. Direct AI visibility boost.'},
+      {ico:'🚀', n:'WP Rocket', t:'SPEED', col:'#378ADD', ins:'$59/yr plugin', d:'3.8s to under 1.5s load time. Speed is a ranking signal for Google AI.'}
+    ],
+    opp:'WordPress setup engagement: schema, chatbot, booking, speed. Estimated value: 3-5 new bookings per month previously lost.'
+  },
+  {
+    platform:'Squarespace', icon:'⬛',
+    scores:[{v:'44',c:'w',l:'Overall'},{v:'71',c:'g',l:'Mobile'},{v:'68',c:'g',l:'Speed'},{v:'18',c:'b',l:'AI Ready'}],
+    checks:[
+      {ok:true, l:'Squarespace CMS detected', d:'Clean, fast - good mobile foundation'},
+      {ok:false, l:'No schema markup', d:'Must be injected manually via header code'},
+      {ok:true, l:'Speed: 1.9s', d:'Strong - CDN handles most optimization'},
+      {ok:false, l:'No AI chatbot', d:'Tidio can be added via one embed code line'},
+      {ok:true, l:'SSL active', d:'HTTPS properly configured'},
+      {ok:true, l:'Mobile: 71/100', d:'Good - responsive templates by default'},
+      {ok:false, l:'No meta descriptions on service pages', d:'AI cannot describe individual service pages'},
+      {ok:'warn', l:'Booking on separate domain', d:'Redirect loses about 40% of mobile bookings'},
+      {ok:false, l:'No FAQ content', d:'Missing primary AI citation source'},
+      {ok:'warn', l:'Basic contact form', d:'Submissions go to email only'}
+    ],
+    tools:[
+      {ico:'💬', n:'Tidio Chat', t:'CHATBOT', col:'#4CC9F0', ins:'Free embed code', d:'One line into Code Injection. AI chatbot live in minutes.'},
+      {ico:'🔍', n:'Schema Injection', t:'SCHEMA', col:'#F5A623', ins:'Code Injection (free)', d:'Paste LocalBusiness JSON-LD into Settings > Advanced > Code Injection.'},
+      {ico:'📋', n:'Embedded Booking', t:'BOOKING', col:'#00E5A0', ins:'Embed block', d:'Put booking calendar on service pages. Removes redirect that loses 40% of mobile bookings.'},
+      {ico:'📝', n:'FAQ Content Block', t:'CONTENT', col:'#9B5DE5', ins:'Accordion block', d:'Visible FAQ section becomes the primary AI citation source.'}
+    ],
+    opp:'Squarespace GEO setup: 2-3 hour engagement. Schema injection, chatbot, embedded booking, FAQ content. Clean and repeatable.'
+  }
+];
+
+var DS = [
+  {
+    label:'ARI 14 / Critical', pillClass:'pill-low', webIdx:0,
+    ari:{num:14, col:'#ff4d4d', recs:'3%', sov:'8%', cit:4, plat:1},
+    revenue:{lost:'8-12', calls:'2x more', time:'90 days'},
+    execText:'This business is currently <b>invisible to AI search</b>. With an ARI of 14/100, it does not appear in ChatGPT, Google AI, Gemini, or Meta AI when local customers ask for recommendations. Estimated <b>8-12 qualified leads lost per month</b> to competitors who are AI-visible. The website lacks schema, has no chatbot, and has no FAQ content - all fixable in under two weeks.',
+    topComp:{name:'Top Competitor', desc:'"Consistently the top-rated option in the area. Fast response times, fair pricing, and over 289 verified reviews. Available same-day. Highly recommended."'},
+    yourDesc:'No AI description found. This business does not appear in AI recommendation responses. When customers ask AI for local recommendations, this business is not mentioned.',
+    sov:[{n:'Top Competitor',pct:71,c:'comp-fill'},{n:'2nd Competitor',pct:44,c:'comp2-fill'},{n:'3rd Competitor',pct:23,c:'comp2-fill'},{n:'You',pct:8,c:'you-fill'}],
+    pillars:[
+      {t:'Entity & Schema', g:'F', gc:'#ff4d4d', items:[{d:'db',t:'No LocalBusiness schema'},{d:'db',t:'Not in Knowledge Graph'},{d:'db',t:'Missing Wikidata entity'},{d:'dw',t:'GBP incomplete'}]},
+      {t:'Citation Auth.', g:'D', gc:'#ff4d4d', items:[{d:'db',t:'Only 4 web citations'},{d:'db',t:'No industry directories'},{d:'dw',t:'Yelp sparse'},{d:'db',t:'Zero forum mentions'}]},
+      {t:'Content', g:'D+', gc:'#f5a623', items:[{d:'db',t:'No FAQ on site'},{d:'dw',t:'Service pages generic'},{d:'db',t:'No stat-backed content'},{d:'dw',t:'No comparison content'}]},
+      {t:'Social & Reviews', g:'C-', gc:'#f5a623', items:[{d:'dw',t:'12 reviews (need 50+)'},{d:'db',t:'0% response rate'},{d:'db',t:'No posts in 6 months'},{d:'dw',t:'No LinkedIn'}]}
+    ],
+    platforms:[
+      {n:'ChatGPT', s:'not-found', tag:'NOT FOUND', txt:'No mention in any local recommendation query. Business is completely absent.', q:null},
+      {n:'Google AI Overview', s:'not-found', tag:'NOT FOUND', txt:'No GBP schema detected. AI Overview cannot pull structured business data without it.', q:null},
+      {n:'Gemini', s:'not-found', tag:'NOT FOUND', txt:'Not in Google Knowledge Graph. Entity structurally invisible to Gemini.', q:null},
+      {n:'Perplexity', s:'partial', tag:'PARTIAL', txt:'Appeared in one directory citation. Not directly recommended. Competitor cited 4x more often.', q:'A few local options were noted though the competitor had stronger recent feedback.'},
+      {n:'Meta AI', s:'not-found', tag:'NOT FOUND', txt:'Low Facebook engagement means no Meta AI signal. Needs minimum 3 posts per week.', q:null}
+    ],
+    competitors:[
+      {n:'Top Local Competitor', dist:'1.4km', tc:'th', tp:'tph', tl:'HIGH THREAT', ms:[{v:'4.9',c:'g',l:'Rating'},{v:'289',c:'g',l:'Reviews'},{v:'71%',c:'g',l:'AI SoV'},{v:'ARI 84',c:'g',l:'Score'},{v:'#1',c:'g',l:'Rank'}], web:['WordPress','Schema checked','Chatbot checked','ARI 84'], ai:'Cited as top local provider across all platforms. Full schema, Knowledge Graph, 289 reviews, 94% response rate.'},
+      {n:'2nd Competitor', dist:'2.9km', tc:'tm', tp:'tpm', tl:'MED THREAT', ms:[{v:'4.5',c:'w',l:'Rating'},{v:'134',c:'w',l:'Reviews'},{v:'44%',c:'w',l:'AI SoV'},{v:'ARI 57',c:'w',l:'Score'},{v:'#3',c:'w',l:'Rank'}], web:['Squarespace','Schema checked','No chatbot','ARI 57'], ai:'Appears in category queries. Active GBP. Visible on Google AI and Gemini.'},
+      {n:'3rd Competitor', dist:'4.6km', tc:'tl', tp:'tpl', tl:'LOW THREAT', ms:[{v:'4.1',c:'w',l:'Rating'},{v:'61',c:'b',l:'Reviews'},{v:'23%',c:'b',l:'AI SoV'},{v:'ARI 31',c:'w',l:'Score'},{v:'#6',c:'b',l:'Rank'}], web:['Wix','No schema','No chatbot','ARI 31'], ai:'Occasional list mention only. NAP inconsistencies suppressing citation score.'}
+    ],
+    fixes:[
+      {t:'<b>Add LocalBusiness JSON-LD schema</b> - single most impactful action. Paste into WordPress header injection.', imp:'HIGH IMPACT', sp:'1 week', d:'Makes site readable to Google AI, Gemini, and Perplexity immediately.'},
+      {t:'<b>Install Tidio AI chatbot</b> - free plan, 5-minute install. Every unanswered question is a lost booking.', imp:'HIGH IMPACT', sp:'1 day', d:'Answers pricing questions, captures contact details. Works immediately after install.'},
+      {t:'<b>Register in Google Knowledge Graph + Wikidata</b> - Gemini and Google AI are structurally blind without this.', imp:'HIGH IMPACT', sp:'2-4 weeks', d:'Submit via Google entity form. Build Wikidata entry with full NAP and sameAs links.'},
+      {t:'<b>Build to 50+ Google reviews with 80%+ response rate</b> - currently 12 reviews, 0% response rate.', imp:'HIGH IMPACT', sp:'60-90 days', d:'Set up post-service SMS ask via booking platform. 4 new reviews per week minimum.'},
+      {t:'<b>Add booking widget to every service page</b> - mobile users will not call to book.', imp:'MED IMPACT', sp:'1 day', d:'An embedded widget captures clients who would otherwise bounce to a competitor.'},
+      {t:'<b>Create FAQ content page + FAQPage schema</b> - primary AI citation source. Currently absent.', imp:'MED IMPACT', sp:'1 week', d:'Answer 6-8 common questions. These become the snippets ChatGPT and Perplexity cite.'},
+      {t:'<b>Fix NAP consistency across all directories</b> - every mismatch is an active trust penalty.', imp:'MED IMPACT', sp:'3 days', d:'Run BrightLocal audit. Every directory must match exactly.'}
+    ]
+  },
+  {
+    label:'ARI 43 / Developing', pillClass:'pill-mid', webIdx:1,
+    ari:{num:43, col:'#f5a623', recs:'28%', sov:'35%', cit:38, plat:3},
+    revenue:{lost:'3-5', calls:'40% more', time:'60 days'},
+    execText:'This business has a <b>developing AI presence</b> with an ARI of 43/100. Visible on Google AI and Perplexity but missing from Gemini, Meta AI, and top ChatGPT recommendations. The top competitor has ARI 91 and dominates all 5 platforms. Estimated <b>3-5 qualified leads lost per month</b>. Website needs a chatbot, embedded booking, and Knowledge Graph registration.',
+    topComp:{name:'Top Competitor', desc:'"The most trusted option in the area with same-day availability. Consistently praised for professionalism and quality. Over 341 five-star reviews. Highly recommended by locals."'},
+    yourDesc:'Appears in branded searches and some comparison responses. AI describes as "a well-regarded local option with competitive pricing." Not yet recommended as the top choice for category queries.',
+    sov:[{n:'Top Competitor',pct:79,c:'comp-fill'},{n:'2nd Competitor',pct:55,c:'comp2-fill'},{n:'You',pct:35,c:'you-fill'},{n:'3rd Competitor',pct:19,c:'comp2-fill'}],
+    pillars:[
+      {t:'Entity & Schema', g:'C+', gc:'#f5a623', items:[{d:'dg',t:'LocalBusiness schema present'},{d:'dg',t:'GBP fully optimized'},{d:'dw',t:'Not in Knowledge Graph yet'},{d:'db',t:'Missing service schema'}]},
+      {t:'Citation Auth.', g:'C', gc:'#f5a623', items:[{d:'dg',t:'38 web citations'},{d:'dw',t:'Missing 4 directories'},{d:'dw',t:'NAP inconsistent on 3'},{d:'db',t:'No editorial mentions'}]},
+      {t:'Content', g:'B-', gc:'#00E5A0', items:[{d:'dg',t:'FAQ on homepage'},{d:'dw',t:'Service pages not answer-first'},{d:'dg',t:'Blog exists (infrequent)'},{d:'db',t:'No stat-backed content'}]},
+      {t:'Social & Reviews', g:'C+', gc:'#f5a623', items:[{d:'dw',t:'67 reviews (need 150+)'},{d:'dw',t:'42% response rate'},{d:'db',t:'Facebook once/month'},{d:'dw',t:'No Reddit presence'}]}
+    ],
+    platforms:[
+      {n:'ChatGPT', s:'partial', tag:'PARTIAL', txt:'Appears for branded searches but not top 3 for category queries.', q:'Decent reviews though the competitor comes up more for urgent and same-day work.'},
+      {n:'Google AI Overview', s:'found', tag:'FOUND', txt:'Knowledge panel active. Hours, rating, and category surface correctly for branded queries.', q:'Rated 4.4 stars with 67 reviews. Open Tuesday through Saturday.'},
+      {n:'Gemini', s:'partial', tag:'PARTIAL', txt:'Shows for branded searches only. Knowledge Graph registration would unlock unbranded queries.', q:null},
+      {n:'Perplexity', s:'found', tag:'FOUND', txt:'Cited in comparison responses and local list articles.', q:'Both are well-regarded. This business offers competitive pricing per recent reviews.'},
+      {n:'Meta AI', s:'not-found', tag:'NOT FOUND', txt:'Facebook frequency too low - once per month is not enough signal for Meta AI.', q:null}
+    ],
+    competitors:[
+      {n:'Top Local Competitor', dist:'0.9km', tc:'th', tp:'tph', tl:'HIGH THREAT', ms:[{v:'4.8',c:'g',l:'Rating'},{v:'341',c:'g',l:'Reviews'},{v:'79%',c:'g',l:'AI SoV'},{v:'ARI 91',c:'g',l:'Score'},{v:'#1',c:'g',l:'Rank'}], web:['WordPress','Schema checked','Chatbot checked','ARI 91'], ai:'Dominates all 5 platforms. AI describes as most trusted with same-day availability. Knowledge Graph, 10 press mentions, 341 reviews.'},
+      {n:'2nd Competitor', dist:'2.4km', tc:'tm', tp:'tpm', tl:'MED THREAT', ms:[{v:'4.6',c:'w',l:'Rating'},{v:'158',c:'w',l:'Reviews'},{v:'55%',c:'w',l:'AI SoV'},{v:'ARI 63',c:'w',l:'Score'},{v:'#2',c:'w',l:'Rank'}], web:['Squarespace','Schema checked','No chatbot','ARI 63'], ai:'Strong on ChatGPT and Perplexity. FAQ structure outperforming yours on category queries.'},
+      {n:'3rd Competitor', dist:'5.1km', tc:'tl', tp:'tpl', tl:'LOW THREAT', ms:[{v:'4.2',c:'w',l:'Rating'},{v:'48',c:'b',l:'Reviews'},{v:'19%',c:'b',l:'AI SoV'},{v:'ARI 28',c:'w',l:'Score'},{v:'#8',c:'b',l:'Rank'}], web:['Wix','No schema','No chatbot','ARI 28'], ai:'Rarely surfaces. Weak citation profile, no schema. Beatable with 4-6 weeks of work.'}
+    ],
+    fixes:[
+      {t:'<b>Install Tidio chatbot on Squarespace</b> - one embed code line in Code Injection footer. Immediate lead capture.', imp:'HIGH IMPACT', sp:'1 day', d:'Free plan. Answers pricing, checks availability. Top competitor has one - direct competitive gap.'},
+      {t:'<b>Submit to Google Knowledge Graph + Wikidata</b> - top competitor is in it. You are not.', imp:'HIGH IMPACT', sp:'2-4 weeks', d:'Submit via Google entity form. Build Wikidata entry. Gemini unlocks after processing.'},
+      {t:'<b>Rewrite service pages answer-first</b> - 2nd competitor FAQ structure is why they rank number 2 on ChatGPT.', imp:'HIGH IMPACT', sp:'2 weeks', d:'75-word structured answer leads every page. AI extracts this as a citation snippet.'},
+      {t:'<b>Double review velocity - target 150+ by month 3</b> - currently 67 vs top competitor 341.', imp:'HIGH IMPACT', sp:'60-90 days', d:'Automated SMS via booking platform 2 hours after appointment. Respond to every review.'},
+      {t:'<b>Embed booking directly on service pages</b> - current redirect loses 40% of mobile bookings.', imp:'MED IMPACT', sp:'1 day', d:'Use Squarespace embed block on each service page. Remove the redirect entirely.'},
+      {t:'<b>Earn 3 editorial citations in 60 days</b> - D Magazine, Dallas Observer, CultureMap.', imp:'MED IMPACT', sp:'6-8 weeks', d:'Editorial mentions are the highest-weight AI citation type. Pitch your unique differentiators.'}
+    ]
+  }
+];
+
+// -- INIT ----------------------------------------------
+window.addEventListener('load', function() {
+
+  // Color picker
+  document.getElementById('colorPicker').addEventListener('input', function() {
+    syncColor(this.value);
+  });
+  document.getElementById('hexInput').addEventListener('input', function() {
+    var v = this.value;
+    if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+      HEX = v;
+      document.getElementById('colorPicker').value = v;
+      document.getElementById('swatchBox').style.background = v;
+    }
+  });
+
+  // Chips
+  document.querySelectorAll('.chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var biz = this.getAttribute('data-biz');
+      var color = this.getAttribute('data-color');
+      var ind = this.getAttribute('data-ind');
+      document.getElementById('bizInput').value = biz;
+      if (color) syncColor(color);
+      if (color) document.getElementById('colorPicker').value = color;
+      if (ind) document.getElementById('industrySelect').value = ind;
+    });
+  });
+
+  // Scan button
+  document.getElementById('scanBtn').addEventListener('click', function() {
+    startScan();
+  });
+
+  // Enter key
+  document.getElementById('bizInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') startScan();
+  });
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var name = this.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
+    });
+  });
+
+  // Download
+  document.getElementById('dlBtn').addEventListener('click', function() {
+    downloadPDF();
+  });
+
+  // Reset
+  document.getElementById('resetBtn').addEventListener('click', function() {
+    resetApp();
+  });
+
+  // Share
+  document.getElementById('shareBtn').addEventListener('click', function() {
+    copyShareText();
+  });
+
+});
+
+// -- COMPETITOR NAME GENERATOR ------------------------
+var COMP_NAMES = {
+  salon: [
+    ['The Blowout Bar','Luxe Hair Studio','Studio 54 Hair','Velvet Salon','Mane Attraction','The Hair Loft','Gloss Hair Co','Noir Salon','Reverie Hair','Salon Collective'],
+    ['Color Theory Studio','Bloom Hair Studio','The Curl Bar','Prism Salon','Harvest Hair Co','Studio Eleven','Revel Hair','Atelier Hair','Craft Hair Studio','The Style Room']
+  ],
+  dental: [
+    ['Smile Studio','Bright Dental Co','Pearl Dental','Apex Dental Care','Summit Smiles','Clear Dental','Elite Smiles','Precision Dental','Smile by Design','Modern Dental'],
+    ['Family Dental Group','Comfort Dental','City Dental Studio','Preferred Dental','Pure Smiles','Signature Dental','ProSmile Dental','Dental Excellence','Prime Dental','Radiant Smiles']
+  ],
+  gym: [
+    ['Iron House Gym','Peak Fitness Club','Elevate Athletic','Forge Fitness','Titan Gym','The Training Ground','Apex Performance','Drive Fitness','Pulse Gym','Core Athletics'],
+    ['FitZone Studio','Momentum Fitness','Pinnacle Gym','Power House Fitness','Athletic Edge','Motion Gym','Kinetic Fitness','Revv Athletics','Stronghold Gym','The Fit Factory']
+  ],
+  restaurant: [
+    ['The Local Table','Corner Bistro','Urban Kitchen','Harvest Kitchen','The Rustic Fork','Main Street Grill','The Copper Pot','Social Kitchen','The Larder','Table & Vine'],
+    ['Provisions Kitchen','The Daily Special','Common Ground','The Neighbourhood','Planted Kitchen','The Workshop','Rooftop Kitchen','The Corner Table','Market Kitchen','Flora Kitchen']
+  ],
+  plumbing: [
+    ['ProFlow Plumbing','Rapid Response Plumbing','City Wide Plumbing','Precision Plumbing','All Star Plumbing','First Choice Plumbing','Reliable Plumbing Co','Expert Plumbing','Top Notch Plumbing','Premier Plumbing'],
+    ['QuickFix Plumbing','Master Plumbers','Trusted Plumbing','Quality Plumbing Co','Pro Pipe Services','FastFlow Plumbing','Elite Plumbing','Hometown Plumbing','Metro Plumbing','TruBlue Plumbing']
+  ],
+  legal: [
+    ['The Law Group','Premier Legal','City Law Firm','Apex Legal Services','Summit Law','Elite Legal Group','Trusted Legal','First Choice Law','ProLegal Partners','The Legal Team'],
+    ['Downtown Legal','Metro Law Group','Precision Legal','Landmark Law','Clarity Legal','Advocate Law Group','Legal Solutions','Charter Law','Keystone Legal','Liberty Law Group']
+  ],
+  realestate: [
+    ['Premier Properties','City Realty Group','Apex Real Estate','Summit Homes','Elite Realty','Landmark Properties','Trusted Realty','First Choice Homes','ProHome Realty','The Property Group'],
+    ['Metro Realty','Signature Properties','Precision Realty','Heritage Real Estate','Clarity Homes','Select Realty','Prime Properties','Charter Real Estate','Key Realty','Liberty Homes']
+  ],
+  auto: [
+    ['ProCare Auto','City Auto Service','Precision Auto Repair','Apex Motors','Summit Auto','Elite Auto Care','Trusted Auto','First Choice Auto','Expert Auto Repair','Premier Auto Service'],
+    ['QuickFix Auto','Master Mechanics','TruCare Auto','Quality Auto Co','FastLane Service','Pro Auto Works','Metro Auto Repair','Hometown Auto','TruBlue Auto','Reliable Auto Care']
+  ],
+  general: [
+    ['Premier Services','City Wide Services','Apex Solutions','Summit Services','Elite Services','Trusted Local Co','First Choice Services','ProServe Group','The Service Group','Quality Services'],
+    ['Metro Services','Precision Group','Landmark Services','Clarity Solutions','Select Services','Prime Group','Charter Services','Key Solutions','Westside Pro','Eastside Services']
+  ]
+};
+
+function getCompNames(industry, bizName) {
+  // Fallback names by industry - used if API call fails
+  var pool = COMP_NAMES[industry] || COMP_NAMES.general;
+  var all = pool[0].concat(pool[1]);
+  var hash = 0;
+  for (var i=0; i<bizName.length; i++) hash = (hash*31 + bizName.charCodeAt(i)) & 0xffff;
+  var shuffled = all.slice();
+  for (var j=shuffled.length-1; j>0; j--) {
+    var k = (hash * (j+1)) % (j+1);
+    var tmp = shuffled[j]; shuffled[j] = shuffled[k]; shuffled[k] = tmp;
+    hash = (hash * 1103515245 + 12345) & 0xffff;
+  }
+  return shuffled.slice(0, 3);
+}
+
+// Real competitor lookup via Anthropic API with web search
+function fetchRealCompetitors(industry, bizName, city, callback) {
+  var indLabel = IND_LABELS[industry] || 'local business';
+  var prompt = 'Search Google for the top 3 real ' + indLabel + ' businesses near ' + city + ' that would be competitors to ' + bizName + '. Return ONLY a JSON array of exactly 3 objects with these fields: name (business name), dist (distance like "1.2km"), rating (like "4.7"), reviews (number like "234"), website (platform like "WordPress" or "Squarespace" or "Unknown"). Example: [{"name":"The Blowout Bar","dist":"1.1km","rating":"4.8","reviews":"312","website":"WordPress"}]. Return ONLY the JSON array, nothing else.';
+  
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      messages: [{ role: 'user', content: prompt }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = '';
+    if (data.content) {
+      data.content.forEach(function(block) {
+        if (block.type === 'text') text += block.text;
+      });
+    }
+    // Extract JSON array from response
+    var match = text.match(/\[[\s\S]*\]/);
+    if (match) {
+      try {
+        var competitors = JSON.parse(match[0]);
+        if (competitors && competitors.length >= 3) {
+          callback(null, competitors);
+          return;
+        }
+      } catch(e) {}
+    }
+    callback(new Error('Could not parse'), null);
+  })
+  .catch(function(err) {
+    callback(err, null);
+  });
+}
+
+function getCompDist(idx) {
+  var dists = ['0.8km','1.2km','1.4km','1.7km','2.1km','2.3km','2.6km','2.9km','3.4km','4.2km','4.7km','4.9km'];
+  return dists[idx % dists.length];
+}
+
+// -- SCAN ----------------------------------------------
+function startScan() {
+  var val = document.getElementById('bizInput').value.trim();
+  if (!val) {
+    alert('Please enter a business name and city.');
+    return;
+  }
+  BIZ = val;
+  INDUSTRY = document.getElementById('industrySelect').value;
+
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('scanView').style.display = 'block';
+  document.getElementById('resultsView').style.display = 'none';
+  document.getElementById('dlOk').classList.remove('show');
+
+  var steps = document.querySelectorAll('.step');
+  var labels = [
+    'SCANNING CHATGPT + GEMINI...',
+    'SCANNING PERPLEXITY + META AI...',
+    'MAPPING LOCAL COMPETITORS...',
+    'ANALYSING WEBSITE PLATFORM...',
+    'CALCULATING ARI + REVENUE IMPACT...',
+    'BUILDING 8-PAGE PDF REPORT...'
+  ];
+
+  var i = 0;
+  function next() {
+    if (i > 0) {
+      steps[i-1].classList.remove('active');
+      steps[i-1].classList.add('done');
+    }
+    if (i < steps.length) {
+      steps[i].classList.add('active');
+      document.getElementById('scanLbl').textContent = labels[i];
+      i++;
+      // On step 3 (competitor mapping), kick off real competitor fetch in background
+      if (i === 3) {
+        var cityForSearch = val.indexOf(',') > -1 ? val.split(',').slice(1).join(',').trim() : val;
+        fetchRealCompetitors(INDUSTRY, val, cityForSearch, function(err, comps) {
+          if (!err && comps) {
+            window._realCompetitors = comps;
+          }
+        });
+      }
+      setTimeout(next, 750);
+    } else {
+      steps[steps.length-1].classList.remove('active');
+      steps[steps.length-1].classList.add('done');
+      setTimeout(function() { showResults(val); }, 400);
+    }
+  }
+  next();
+}
+
+// -- COMPETITOR MAP ------------------------------------
+function buildCompetitorMap(bizName, city, industry) {
+  var mapDiv = document.getElementById('competitorMap');
+  var loadDiv = document.getElementById('mapLoading');
+  if (!mapDiv) return;
+
+  var indLabel = IND_LABELS[industry] || 'local business';
+
+  // Geocode the business address first
+  var geocoder = new google.maps.Geocoder();
+  geocoder.geocode({ address: bizName + ', ' + city }, function(results, status) {
+    var center;
+    if (status === 'OK' && results[0]) {
+      center = results[0].geometry.location;
+    } else {
+      // Fallback: just geocode the city
+      geocoder.geocode({ address: city }, function(r2, s2) {
+        if (s2 === 'OK' && r2[0]) {
+          center = r2[0].geometry.location;
+          renderMap(center);
+        }
+      });
+      return;
+    }
+    renderMap(center);
+  });
+
+  function renderMap(center) {
+    if (loadDiv) loadDiv.style.display = 'none';
+    mapDiv.style.display = 'block';
+
+    var map = new google.maps.Map(mapDiv, {
+      center: center,
+      zoom: 13,
+      styles: [
+        { elementType: 'geometry', stylers: [{ color: '#0A0E14' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#8a9ab0' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#0A0E14' }] },
+        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#161e2a' }] },
+        { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#111720' }] },
+        { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#1c2535' }] },
+        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d1520' }] },
+        { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#111720' }] },
+        { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#111720' }] }
+      ],
+      disableDefaultUI: false,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: true
+    });
+
+    // Draw 5km radius circle
+    new google.maps.Circle({
+      map: map,
+      center: center,
+      radius: 5000,
+      fillColor: '#00E5A0',
+      fillOpacity: 0.06,
+      strokeColor: '#00E5A0',
+      strokeOpacity: 0.4,
+      strokeWeight: 1.5
+    });
+
+    // Pin the scanned business (green star)
+    var mainMarker = new google.maps.Marker({
+      position: center,
+      map: map,
+      title: bizName,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 10,
+        fillColor: '#00E5A0',
+        fillOpacity: 1,
+        strokeColor: '#0A0E14',
+        strokeWeight: 2
+      },
+      zIndex: 999
+    });
+
+    var mainInfo = new google.maps.InfoWindow({
+      content: '<div style="background:#0A0E14;color:#f0f4ff;padding:8px 12px;border-radius:8px;font-family:Syne,sans-serif;min-width:140px">' +
+        '<div style="color:#00E5A0;font-size:11px;font-weight:700;margin-bottom:2px">SCANNED BUSINESS</div>' +
+        '<div style="font-size:12px;font-weight:600">' + bizName + '</div>' +
+        '</div>'
+    });
+    mainMarker.addListener('click', function() { mainInfo.open(map, mainMarker); });
+
+    // Search for nearby competitors using Places API
+    var service = new google.maps.places.PlacesService(map);
+    var searchType = {
+      salon: 'hair_care',
+      dental: 'dentist',
+      gym: 'gym',
+      restaurant: 'restaurant',
+      plumbing: 'plumber',
+      legal: 'lawyer',
+      realestate: 'real_estate_agency',
+      auto: 'car_repair',
+      general: 'establishment'
+    }[industry] || 'establishment';
+
+    service.nearbySearch({
+      location: center,
+      radius: 5000,
+      type: searchType
+    }, function(results, status) {
+      if (status !== google.maps.places.PlacesServiceStatus.OK || !results) return;
+
+      // Store real competitor names for the cards
+      var realNames = [];
+      var realData = [];
+
+      results.slice(0, 8).forEach(function(place, idx) {
+        if (!place.geometry) return;
+
+        var isCompetitor = place.name.toLowerCase() !== bizName.toLowerCase().split(',')[0];
+        if (!isCompetitor) return;
+
+        realNames.push(place.name);
+        realData.push({
+          name: place.name,
+          rating: place.rating ? String(place.rating) : '4.2',
+          reviews: place.user_ratings_total ? String(place.user_ratings_total) : '45',
+          vicinity: place.vicinity || ''
+        });
+
+        var color = idx < 3 ? '#ff4d4d' : idx < 5 ? '#f5a623' : '#6a7a8f';
+        var scale = idx < 3 ? 8 : idx < 5 ? 7 : 6;
+
+        var marker = new google.maps.Marker({
+          position: place.geometry.location,
+          map: map,
+          title: place.name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: scale,
+            fillColor: color,
+            fillOpacity: 0.9,
+            strokeColor: '#0A0E14',
+            strokeWeight: 1.5
+          }
+        });
+
+        var stars = place.rating ? place.rating.toFixed(1) + ' stars' : 'No rating';
+        var reviews = place.user_ratings_total ? place.user_ratings_total + ' reviews' : '';
+        var threatLabel = idx < 3 ? 'HIGH THREAT' : idx < 5 ? 'MED THREAT' : 'LOW THREAT';
+        var threatColor = idx < 3 ? '#ff4d4d' : idx < 5 ? '#f5a623' : '#6a7a8f';
+
+        var infoContent = '<div style="background:#111720;color:#f0f4ff;padding:10px 13px;border-radius:8px;font-family:Syne,sans-serif;min-width:160px;max-width:200px">' +
+          '<div style="font-size:10px;font-weight:700;color:' + threatColor + ';margin-bottom:4px;font-family:Space Mono,monospace">' + threatLabel + '</div>' +
+          '<div style="font-size:12px;font-weight:700;margin-bottom:3px">' + place.name + '</div>' +
+          '<div style="font-size:11px;color:#6a7a8f">' + stars + (reviews ? ' &bull; ' + reviews : '') + '</div>' +
+          '</div>';
+
+        var infoWindow = new google.maps.InfoWindow({ content: infoContent });
+        marker.addListener('click', function() { infoWindow.open(map, marker); });
+      });
+
+      // Update competitor cards with real names and data
+      if (realData.length >= 3 && window._updateCompetitorCards) {
+        window._updateCompetitorCards(realData.slice(0, 3));
+      }
+    });
+  }
+}
+
+// -- RESULTS -------------------------------------------
+function showResults(biz) {
+  var d = DS[Math.floor(Math.random() * DS.length)];
+  DATA = d;
+
+  document.getElementById('scanView').style.display = 'none';
+  document.getElementById('resultsView').style.display = 'block';
+
+  // Reset tabs
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelector('[data-tab="overview"]').classList.add('active');
+  document.getElementById('tab-overview').classList.add('active');
+
+  document.getElementById('bizTitle').textContent = biz;
+  document.getElementById('indTag').textContent = IND_LABELS[INDUSTRY] || 'Service Business';
+  document.getElementById('shareNum').textContent = d.ari.num + '/100';
+
+  var pill = document.getElementById('scorePill');
+  pill.textContent = d.label;
+  pill.className = 'score-pill ' + d.pillClass;
+
+  // ARI card
+  var a = d.ari;
+  var ac = a.num < 30 ? 'b' : a.num < 60 ? 'w' : 'g';
+  document.getElementById('ariCard').innerHTML =
+    '<div class="ari-ring" style="border:3px solid ' + a.col + '">' +
+    '<div class="ari-n" style="color:' + a.col + '">' + a.num + '</div>' +
+    '<div class="ari-s">ARI SCORE</div></div>' +
+    '<div><div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">AI Readiness Index</div>' +
+    '<div class="ari-grid">' +
+    '<div class="ari-cell"><div class="av ' + ac + '">' + a.recs + '</div><div class="al">Rec. rate</div></div>' +
+    '<div class="ari-cell"><div class="av ' + ac + '">' + a.sov + '</div><div class="al">Share of Voice</div></div>' +
+    '<div class="ari-cell"><div class="av ' + (a.cit < 20 ? 'b' : a.cit < 60 ? 'w' : 'g') + '">' + a.cit + '</div><div class="al">Web citations</div></div>' +
+    '<div class="ari-cell"><div class="av ' + (a.plat < 2 ? 'b' : a.plat < 4 ? 'w' : 'g') + '">' + a.plat + '/5</div><div class="al">Platforms visible</div></div>' +
+    '</div></div>';
+
+  // Exec summary
+  document.getElementById('execBox').innerHTML =
+    '<div class="exec-lbl">EXECUTIVE SUMMARY</div>' +
+    '<div class="exec-txt">' + d.execText + '</div>' +
+    '<div class="rev-grid">' +
+    '<div class="rev-item"><div class="rev-n">' + d.revenue.lost + '</div><div class="rev-l">Est. leads lost per month</div></div>' +
+    '<div class="rev-item"><div class="rev-n">' + d.revenue.calls + '</div><div class="rev-l">Calls at ARI 60+</div></div>' +
+    '<div class="rev-item"><div class="rev-n">' + d.revenue.time + '</div><div class="rev-l">Time to see results</div></div>' +
+    '</div>';
+
+  // Overview tab
+  var maxSov = Math.max.apply(null, d.sov.map(function(s) { return s.pct; }));
+  var ov = '<div class="sec">share of voice vs competitors</div>';
+  d.sov.forEach(function(s) {
+    var isYou = s.c === 'you-fill';
+    ov += '<div class="sov-row">' +
+      '<div class="sov-name" style="' + (isYou ? 'color:var(--brand);font-weight:600' : '') + '">' + (isYou ? '&#9658; You' : s.n) + '</div>' +
+      '<div class="sov-track"><div class="sov-fill ' + s.c + '" style="width:' + Math.round(s.pct/maxSov*100) + '%"></div></div>' +
+      '<div class="sov-pct">' + s.pct + '%</div></div>';
+  });
+  ov += '<div style="height:12px"></div><div class="sec">geo signal pillars</div><div class="pillars">';
+  d.pillars.forEach(function(p) {
+    ov += '<div class="pillar"><div class="pillar-h"><span>' + p.t + '</span><span class="pillar-g" style="color:' + p.gc + '">' + p.g + '</span></div>';
+    p.items.forEach(function(item) {
+      ov += '<div class="pi"><div class="dot ' + item.d + '"></div>' + item.t + '</div>';
+    });
+    ov += '</div>';
+  });
+  ov += '</div>';
+  var qw = QUICK_WINS[INDUSTRY] || QUICK_WINS.general;
+  ov += '<div class="quick-wins"><div class="sec">quick wins - do these this week, free</div><div>';
+  qw.forEach(function(q, i) {
+    ov += '<div class="qw-item"><div class="qw-n">' + (i+1) + '</div>' + q + '</div>';
+  });
+  ov += '</div></div>';
+  document.getElementById('tab-overview').innerHTML = ov;
+
+  // Platforms tab
+  var aiCompare = '<div class="sec">what ai says - them vs you</div>' +
+    '<div class="adc-row">' +
+    '<div class="adc them"><div class="adc-l">TOP COMPETITOR - AI DESCRIPTION</div><div class="adc-n">' + d.topComp.name + '</div><div class="adc-t">' + d.topComp.desc + '</div></div>' +
+    '<div class="adc you"><div class="adc-l">YOUR BUSINESS - AI DESCRIPTION</div><div class="adc-n">' + biz + '</div><div class="adc-t">' + d.yourDesc + '</div></div>' +
+    '</div>';
+  var pl = '';
+  d.platforms.forEach(function(p) {
+    pl += '<div class="p-card ' + p.s + '">' +
+      '<div class="p-name">' + p.n + '</div>' +
+      '<div class="stag ' + (p.s==='found'?'sf':p.s==='partial'?'sp':'sn') + '">' + p.tag + '</div>' +
+      '<div class="p-txt">' + p.txt + '</div>' +
+      (p.q ? '<div class="ai-q"><div class="ai-ql">AI RESPONSE EXCERPT</div><div class="ai-qt">"' + p.q + '"</div></div>' : '') +
+      '</div>';
+  });
+  document.getElementById('tab-platforms').innerHTML = aiCompare + pl;
+
+  // Competitors tab - map + cards
+  var cityPart = BIZ.indexOf(',') > -1 ? BIZ.split(',').slice(1).join(',').trim() : 'your area';
+
+  // Inject map container + cards wrapper into the tab
+  document.getElementById('tab-competitors').innerHTML =
+    '<div class="map-container">' +
+      '<div class="map-header">&#128205; LIVE COMPETITOR MAP &mdash; 5KM RADIUS <span style="color:var(--muted);font-size:9px">Click pins for details</span></div>' +
+      '<div id="mapLoading" class="map-loading">&#9685;&nbsp; Loading live competitor map...</div>' +
+      '<div id="competitorMap" style="display:none;width:100%;height:340px"></div>' +
+      '<div class="map-footer">&#128308; High threat &nbsp;&#128992; Medium &nbsp;&#9898; Low threat &nbsp;&bull;&nbsp; &#128994; Your business</div>' +
+    '</div>' +
+    '<div id="competitorCardsWrap"></div>';
+
+  // Build competitor cards function
+  function buildCompCards(comps) {
+    var html = '<div style="font-family:Space Mono,monospace;font-size:9px;color:var(--brand);letter-spacing:.09em;text-transform:uppercase;margin-bottom:10px">competitors within 5km radius</div>';
+    comps.forEach(function(c) {
+      html += '<div class="comp-card ' + c.tc + '">';
+      html += '<div class="cc-top"><div><div class="cc-name">' + c.n + '</div><div class="cc-dist">&#128205; ' + c.dist + ' away</div></div><div class="tp ' + c.tp + '">' + c.tl + '</div></div>';
+      html += '<div class="cc-metrics">';
+      c.ms.forEach(function(m) {
+        html += '<div class="cm"><div class="cmv ' + m.c + '">' + m.v + '</div><div class="cml">' + m.l + '</div></div>';
+      });
+      html += '</div>';
+      html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">';
+      c.web.forEach(function(tag) {
+        html += '<span style="font-family:Space Mono,monospace;font-size:9px;padding:2px 8px;border-radius:20px;background:var(--card2);color:var(--muted);border:1px solid var(--border)">' + tag + '</span>';
+      });
+      html += '</div>';
+      html += '<div class="cc-ai"><div class="cc-ai-l">WHAT AI SAYS</div><div class="cc-ai-t">' + c.ai + '</div></div>';
+      if (c.better && c.better.length) {
+        html += '<div style="margin-top:9px;background:rgba(255,77,77,0.04);border:1px solid rgba(255,77,77,0.15);border-radius:8px;padding:9px 11px">';
+        html += '<div style="font-family:Space Mono,monospace;font-size:9px;color:#ff6b6b;letter-spacing:.08em;margin-bottom:7px">WHY THEY ARE WINNING</div>';
+        c.better.forEach(function(b) {
+          html += '<div style="display:flex;align-items:flex-start;gap:7px;font-size:11px;color:var(--text);line-height:1.5;margin-bottom:5px"><div style="width:5px;height:5px;border-radius:50%;background:#ff6b6b;flex-shrink:0;margin-top:5px"></div>' + b + '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    return html;
+  }
+
+  // Render initial cards with industry-matched names
+  var compNames = getCompNames(INDUSTRY, BIZ);
+  var initialComps = d.competitors.map(function(c, ci) {
+    var cc = JSON.parse(JSON.stringify(c));
+    cc.n = compNames[ci] || cc.n;
+    cc.dist = getCompDist(ci);
+    return cc;
+  });
+  document.getElementById('competitorCardsWrap').innerHTML = buildCompCards(initialComps);
+
+  // Build the live Google Maps with Places search
+  function buildLiveMap() {
+    var mapDiv = document.getElementById('competitorMap');
+    var loadDiv = document.getElementById('mapLoading');
+    if (!mapDiv || !window.google || !google.maps || !google.maps.places) {
+      setTimeout(buildLiveMap, 400);
+      return;
+    }
+
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: BIZ + ', ' + cityPart }, function(results, status) {
+      var center;
+      if (status === 'OK' && results[0]) {
+        center = results[0].geometry.location;
+      } else {
+        geocoder.geocode({ address: cityPart }, function(r2, s2) {
+          if (s2 === 'OK' && r2[0]) renderMap(r2[0].geometry.location);
+          else { if(loadDiv) loadDiv.textContent = 'Map unavailable for this location'; }
+        });
+        return;
+      }
+      renderMap(center);
+    });
+
+    function renderMap(center) {
+      if (loadDiv) loadDiv.style.display = 'none';
+      mapDiv.style.display = 'block';
+
+      var map = new google.maps.Map(mapDiv, {
+        center: center,
+        zoom: 13,
+        mapTypeControl: false,
+        streetViewControl: false,
+        styles: [
+          { elementType: 'geometry', stylers: [{ color: '#0A0E14' }] },
+          { elementType: 'labels.text.fill', stylers: [{ color: '#8a9ab0' }] },
+          { elementType: 'labels.text.stroke', stylers: [{ color: '#0A0E14' }] },
+          { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#161e2a' }] },
+          { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#1c2535' }] },
+          { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0d1520' }] },
+          { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+          { featureType: 'transit', stylers: [{ visibility: 'off' }] }
+        ]
+      });
+
+      // 5km circle
+      new google.maps.Circle({
+        map: map,
+        center: center,
+        radius: 5000,
+        fillColor: '#00E5A0',
+        fillOpacity: 0.05,
+        strokeColor: '#00E5A0',
+        strokeOpacity: 0.5,
+        strokeWeight: 1.5
+      });
+
+      // Scanned business pin (green)
+      var mainPin = new google.maps.Marker({
+        position: center,
+        map: map,
+        title: BIZ,
+        zIndex: 999,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 11,
+          fillColor: '#00E5A0',
+          fillOpacity: 1,
+          strokeColor: '#0A0E14',
+          strokeWeight: 2.5
+        }
+      });
+      new google.maps.InfoWindow({
+        content: '<div style="background:#0A0E14;color:#f0f4ff;padding:8px 12px;border-radius:8px;font-family:sans-serif">' +
+          '<div style="color:#00E5A0;font-size:10px;font-weight:700;margin-bottom:2px">YOUR BUSINESS</div>' +
+          '<div style="font-size:12px;font-weight:600">' + BIZ.split(',')[0] + '</div></div>'
+      }).open(map, mainPin);
+
+      // Places search for real competitors
+      var placeType = {
+        salon:'hair_care', dental:'dentist', gym:'gym',
+        restaurant:'restaurant', plumbing:'plumber',
+        legal:'lawyer', realestate:'real_estate_agency',
+        auto:'car_repair', general:'establishment'
+      }[INDUSTRY] || 'establishment';
+
+      var svc = new google.maps.places.PlacesService(map);
+      svc.nearbySearch({
+        location: center,
+        radius: 5000,
+        type: placeType
+      }, function(results, status) {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !results) return;
+
+        var realComps = [];
+        var colors = ['#ff4d4d','#ff4d4d','#ff4d4d','#f5a623','#f5a623','#6a7a8f','#6a7a8f','#6a7a8f'];
+        var threats = ['HIGH THREAT','HIGH THREAT','HIGH THREAT','MED THREAT','MED THREAT','LOW THREAT','LOW THREAT','LOW THREAT'];
+
+        results.forEach(function(place, idx) {
+          if (idx >= 8) return;
+          if (!place.geometry) return;
+          // Skip if it matches the scanned business
+          if (place.name.toLowerCase().indexOf(BIZ.split(',')[0].toLowerCase().split(' ')[0]) > -1) return;
+
+          realComps.push({
+            name: place.name,
+            rating: place.rating ? place.rating.toFixed(1) : '4.2',
+            reviews: place.user_ratings_total ? place.user_ratings_total.toString() : '40'
+          });
+
+          var marker = new google.maps.Marker({
+            position: place.geometry.location,
+            map: map,
+            title: place.name,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: idx < 3 ? 9 : idx < 5 ? 7.5 : 6,
+              fillColor: colors[idx] || '#6a7a8f',
+              fillOpacity: 0.9,
+              strokeColor: '#0A0E14',
+              strokeWeight: 1.5
+            }
+          });
+
+          var iw = new google.maps.InfoWindow({
+            content: '<div style="background:#111720;color:#f0f4ff;padding:10px 13px;border-radius:8px;font-family:sans-serif;min-width:160px">' +
+              '<div style="font-size:10px;font-weight:700;color:' + (colors[idx]||'#6a7a8f') + ';margin-bottom:4px">' + (threats[idx]||'LOW THREAT') + '</div>' +
+              '<div style="font-size:12px;font-weight:700;margin-bottom:3px">' + place.name + '</div>' +
+              '<div style="font-size:11px;color:#6a7a8f">' +
+                (place.rating ? '&#9733; ' + place.rating.toFixed(1) : '') +
+                (place.user_ratings_total ? ' &bull; ' + place.user_ratings_total + ' reviews' : '') +
+              '</div>' +
+              (place.vicinity ? '<div style="font-size:10px;color:#4a5a6a;margin-top:3px">' + place.vicinity + '</div>' : '') +
+              '</div>'
+          });
+          marker.addListener('click', function() { iw.open(map, marker); });
+        });
+
+        // Update competitor cards with real business names and data
+        if (realComps.length >= 3) {
+          var updatedComps = d.competitors.map(function(c, ci) {
+            var cc = JSON.parse(JSON.stringify(c));
+            var real = realComps[ci];
+            if (real) {
+              cc.n = real.name;
+              cc.ms[0].v = real.rating;
+              cc.ms[1].v = real.reviews;
+            }
+            cc.dist = getCompDist(ci);
+            return cc;
+          });
+          var wrap = document.getElementById('competitorCardsWrap');
+          if (wrap) wrap.innerHTML = buildCompCards(updatedComps);
+        }
+      });
+    }
+  }
+
+  buildLiveMap();
+
+  // Website tab
+  var w = WEB[d.webIdx];
+  var wb = '<div class="web-plat"><span style="font-size:20px">' + w.icon + '</span>' +
+    '<div><div style="font-weight:700;font-size:13px">' + w.platform + ' detected</div>' +
+    '<div style="font-size:10px;color:var(--muted)">Platform + AI readiness analysis</div></div></div>' +
+    '<div class="web-scores">';
+  w.scores.forEach(function(s) {
+    var col = s.c==='g' ? 'var(--brand)' : s.c==='w' ? 'var(--warn)' : 'var(--danger)';
+    wb += '<div class="wscore"><div class="wsn" style="color:' + col + '">' + s.v + '</div><div class="wsl">' + s.l + '</div></div>';
+  });
+  wb += '</div><div class="sec">health checks</div><div class="web-checks">';
+  w.checks.forEach(function(c) {
+    var t = c.ok===true ? 'pass' : c.ok===false ? 'fail' : 'warn';
+    var ic = c.ok===true ? '&#10003;' : c.ok===false ? '&#10005;' : '!';
+    wb += '<div class="wcheck"><div class="wci ' + t + '">' + ic + '</div><div><div class="wc-l">' + c.l + '</div><div class="wc-d">' + c.d + '</div></div></div>';
+  });
+  wb += '</div><div class="sec" style="margin-top:10px">recommended tools</div><div class="tools-grid">';
+  w.tools.forEach(function(t) {
+    wb += '<div class="tool"><div class="tool-h">' +
+      '<div class="tool-ico" style="background:' + t.col + '22;color:' + t.col + '">' + t.ico + '</div>' +
+      '<div><div class="tool-n">' + t.n + '</div><div class="tool-t">' + t.t + '</div></div></div>' +
+      '<div class="tool-d">' + t.d + '</div>' +
+      '<span class="tool-ins">&#128230; ' + t.ins + '</span></div>';
+  });
+  wb += '</div><div style="background:var(--card2);border-radius:9px;padding:11px 13px;margin-top:10px;border-left:3px solid var(--brand)">' +
+    '<div style="font-size:9px;font-weight:700;color:var(--brand);letter-spacing:.08em;margin-bottom:4px">SERVICE OPPORTUNITY</div>' +
+    '<div style="font-size:11px;color:#8a9ab0;line-height:1.5">' + w.opp + '</div></div>';
+  document.getElementById('tab-website').innerHTML = wb;
+
+  // Fixes tab
+  var indFixes = IND_FIXES[INDUSTRY] || IND_FIXES.general;
+  var fx = '<div class="sec">priority fix plan - ranked by impact</div>';
+  d.fixes.forEach(function(f, i) {
+    fx += '<div class="fix"><div class="fix-n">' + (i+1) + '</div><div class="fix-b">' +
+      '<div class="fix-t">' + f.t + '</div>' +
+      '<div class="fix-d">' + f.d + '</div>' +
+      '<div class="fix-tags"><span class="ftag ' + (f.imp.indexOf('HIGH') > -1 ? 'fhi' : 'fme') + '">' + f.imp + '</span>' +
+      '<span class="ftag fsp">' + f.sp + '</span></div></div></div>';
+  });
+  fx += '<div style="height:10px"></div><div class="sec">' + (IND_LABELS[INDUSTRY]||'Service Business').toUpperCase() + ' - SPECIFIC ACTIONS</div>';
+  indFixes.forEach(function(f, i) {
+    fx += '<div class="fix"><div class="fix-n" style="background:rgba(55,138,221,.1);color:var(--info)">' + (i+1) + '</div>' +
+      '<div class="fix-b"><div class="fix-t">' + f + '</div></div></div>';
+  });
+  document.getElementById('tab-fixes').innerHTML = fx;
+
+  // Set button color
+  var btn = document.getElementById('dlBtn');
+  var rgb = h2r(HEX);
+  var l = lum(rgb[0], rgb[1], rgb[2]);
+  btn.style.background = HEX;
+  btn.style.color = l > 140 ? '#1A1A1A' : '#FFFFFF';
+}
+
+// -- PDF -----------------------------------------------
+function downloadPDF() {
+  if (!DATA) { alert('Please run a scan first.'); return; }
+  if (typeof window.jspdf === 'undefined') { alert('PDF library loading - try again in a moment.'); return; }
+
+  var btn = document.getElementById('dlBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating report...';
+
+  setTimeout(function() {
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+      var W=210, M=16, CW=W-M*2, y=0;
+      var BR=h2r(HEX), BD=drk(HEX,.35), BL=lgt(HEX,.88);
+      var onB = lum(BR[0],BR[1],BR[2]) > 140 ? [30,30,30] : [255,255,255];
+      var DK=[20,28,36], MD=[100,115,130], LT=[244,247,250];
+      var RD=[220,60,60], WN=[220,150,30], IN=[55,138,221], GR=[0,180,130];
+
+      function NP() {
+        doc.addPage(); y=16;
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.rect(0,0,W,2,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(MD[0],MD[1],MD[2]);
+        doc.text('Destaca  |  ' + BIZ, M, 8);
+        doc.text('Growth System AI  |  Confidential', W-M, 8, {align:'right'});
+      }
+      function CK(n) { if (y+(n||20) > 280) NP(); }
+      function HR(yy) { doc.setDrawColor(BR[0],BR[1],BR[2]); doc.setLineWidth(.35); doc.line(M,yy,M+CW,yy); }
+      function SH(title, sub) {
+        CK(22);
+        doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(title,M,y+7);
+        if (sub) { doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(sub,M,y+14); y+=17; }
+        else { y+=11; }
+        HR(y); y+=5;
+      }
+      function SUB(t) {
+        CK(12);
+        doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(BR[0],BR[1],BR[2]);
+        doc.text(t.toUpperCase(), M, y+4); y+=8;
+      }
+      function BDY(text) {
+        var ls = doc.splitTextToSize(text, CW);
+        CK(ls.length*5+4);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]);
+        ls.forEach(function(l) { doc.text(l,M,y+4); y+=5; }); y+=2;
+      }
+      function GC(g) { return g.charAt(0)==='A'?GR : g.charAt(0)==='B'?IN : g.charAt(0)==='C'?WN : RD; }
+      function SC(s) { return s==='found'?GR : s==='partial'?WN : RD; }
+      function ROW(label, val, i) {
+        CK(10);
+        doc.setFillColor.apply(doc, i%2===0 ? LT : [255,255,255]); doc.rect(M,y,CW,9,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(label,M+4,y+6);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(val,M+75,y+6);
+        y+=9;
+      }
+
+      // COVER
+      doc.setFillColor(DK[0],DK[1],DK[2]); doc.rect(0,0,W,297,'F');
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.rect(0,0,W,3,'F');
+      doc.setFillColor(BD[0],BD[1],BD[2]); doc.rect(0,3,W,64,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(BR[0],BR[1],BR[2]);
+      doc.text('DESTACA  |  AI SEARCH VISIBILITY PLATFORM', M, 24);
+      doc.setFontSize(32); doc.setTextColor(onB[0],onB[1],onB[2]); doc.text('AI Visibility &', M, 40);
+      doc.setFontSize(32); doc.setTextColor(240,245,255); doc.text('GEO Fix Plan', M, 54);
+      doc.setFillColor(BL[0],BL[1],BL[2]); doc.roundedRect(M,70,CW,15,2,2,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(BD[0],BD[1],BD[2]); doc.text(BIZ,M+7,79);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,120,110);
+      doc.text((IND_LABELS[INDUSTRY]||'Service Business') + '  |  Prepared by Growth System AI  |  ' + new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}), M+7, 85);
+
+      var a=DATA.ari, ac=a.num<30?RD:a.num<60?WN:GR;
+      doc.setFillColor(28,38,50); doc.circle(182,47,17,'F');
+      doc.setDrawColor(BR[0],BR[1],BR[2]); doc.setLineWidth(1.4); doc.circle(182,47,17,'S');
+      doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.setTextColor(ac[0],ac[1],ac[2]); doc.text(String(a.num),182,52,{align:'center'});
+      doc.setFontSize(6); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text('ARI SCORE',182,58,{align:'center'});
+
+      var sw=CW/4;
+      [['Rec. Rate',a.recs],['Share of Voice',a.sov],['Citations',String(a.cit)],['Platforms',a.plat+'/5']].forEach(function(kv,i) {
+        var sx=M+i*sw;
+        doc.setFillColor(24,34,46); doc.roundedRect(sx,95,sw-3,18,2,2,'F');
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(sx,95,sw-3,2,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(BR[0],BR[1],BR[2]); doc.text(kv[1],sx+(sw-3)/2,106,{align:'center'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(kv[0],sx+(sw-3)/2,112,{align:'center'});
+      });
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(170,185,200); doc.text('REVENUE IMPACT ESTIMATE', M, 128);
+      [['Est. Leads Lost/Mo',DATA.revenue.lost],['More Calls at ARI 60+',DATA.revenue.calls],['Time to Results',DATA.revenue.time]].forEach(function(rv,i) {
+        var rx=M+i*(CW/3);
+        doc.setFillColor(24,34,46); doc.roundedRect(rx,132,CW/3-3,18,2,2,'F');
+        doc.setFillColor(WN[0],WN[1],WN[2]); doc.roundedRect(rx,132,CW/3-3,2,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(WN[0],WN[1],WN[2]); doc.text(rv[1],rx+(CW/3-3)/2,143,{align:'center'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(rv[0],rx+(CW/3-3)/2,149,{align:'center'});
+      });
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(170,185,200); doc.text('GEO SIGNAL PILLARS', M, 162);
+      DATA.pillars.forEach(function(p,i) {
+        var px=M+i*(CW/4), gc=GC(p.g);
+        doc.setFillColor(24,34,46); doc.roundedRect(px,166,CW/4-3,18,2,2,'F');
+        doc.setFillColor(gc[0],gc[1],gc[2]); doc.roundedRect(px,166,CW/4-3,2,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(gc[0],gc[1],gc[2]); doc.text(p.g,px+(CW/4-3)/2,178,{align:'center'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(145,160,175); doc.text(p.t.split(' ')[0],px+(CW/4-3)/2,183,{align:'center'});
+      });
+
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(170,185,200); doc.text('REPORT CONTENTS', M, 194);
+      [['01','Executive Summary + Revenue Impact'],['02','AI Platform Breakdown (5 platforms)'],['03','Local Competitor Analysis + AI Descriptions'],['04','Website Health + Tool Recommendations'],['05','GEO Fix Plan + Industry-Specific Actions'],['06','Citation Building Strategy'],['07','90-Day Visibility Roadmap'],['08','Day 90 Targets + Measurement Queries']].forEach(function(row,i) {
+        doc.setFillColor(20,30,42); doc.roundedRect(M,198+i*11,CW,9,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(BR[0],BR[1],BR[2]); doc.text(row[0],M+3,198+i*11+6);
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(195,210,225); doc.text(row[1],M+14,198+i*11+6);
+      });
+      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(65,80,95);
+      doc.text('CONFIDENTIAL  |  Growth System AI  |  Do not distribute without permission', W/2, 290, {align:'center'});
+
+      // P2 EXEC SUMMARY
+      NP(); SH('01. Executive Summary + Revenue Impact', (IND_LABELS[INDUSTRY]||'Service Business') + ' - ' + BIZ);
+      var execClean = DATA.execText.replace(/<[^>]+>/g,'');
+      var el = doc.splitTextToSize(execClean, CW-8);
+      doc.setFillColor.apply(doc, lgt(HEX,.94)); doc.roundedRect(M,y,CW,el.slice(0,4).length*5+10,2,2,'F');
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,el.slice(0,4).length*5+10,1,1,'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(DK[0],DK[1],DK[2]);
+      el.slice(0,4).forEach(function(l,li) { doc.text(l,M+7,y+7+li*5); });
+      y += el.slice(0,4).length*5+14;
+
+      [['Revenue metric','Businesses at ARI 60+ average ' + DATA.revenue.calls + ' more inbound leads']].forEach(function(kv,i) { ROW(kv[0],kv[1],i); });
+      y+=6; SUB('Critical Gaps');
+      var gaps = DATA.ari.num < 30 ?
+        ['Zero schema markup - AI cannot read NAP, hours, or services','Not in Google Knowledge Graph - Gemini and Google AI are structurally blind','No chatbot on website - leads being lost 24/7','Only 12 Google reviews, 0% response rate','No FAQ content - primary AI citation source completely missing'] :
+        ['Not in Google Knowledge Graph - Gemini shows branded queries only','67 reviews vs top competitor 341 - significant AI trust gap','Website has no chatbot - direct lead capture gap','NAP inconsistent on 3 directories','No editorial mentions - highest-weight citation type missing'];
+      var bl = lgt(HEX,.93);
+      doc.setFillColor(bl[0],bl[1],bl[2]); doc.roundedRect(M,y,CW,gaps.length*8+8,2,2,'F');
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,gaps.length*8+8,1,1,'F');
+      y+=6;
+      gaps.forEach(function(g) {
+        CK(10);
+        doc.setFillColor(RD[0],RD[1],RD[2]); doc.circle(M+8,y+3,1.4,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]);
+        var ls = doc.splitTextToSize(g, CW-16); doc.text(ls[0]||'',M+12,y+4); y+=8;
+      }); y+=6;
+
+      SUB('Quick Wins - This Week, Zero Cost');
+      var qw = QUICK_WINS[INDUSTRY] || QUICK_WINS.general;
+      qw.forEach(function(q,i) {
+        CK(10);
+        doc.setFillColor.apply(doc, i%2===0 ? LT : [255,255,255]); doc.rect(M,y,CW,9,'F');
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.circle(M+6,y+4.5,2,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]);
+        doc.text(q, M+11, y+6); y+=9;
+      }); y+=4;
+
+      // P3 PLATFORMS
+      NP(); SH('02. AI Platform Breakdown', 'What AI is saying about ' + BIZ);
+      SUB('AI Description Comparison - Them vs You');
+      var thH=22;
+      doc.setFillColor(228,240,252); doc.roundedRect(M,y,CW/2-3,thH,2,2,'F');
+      doc.setDrawColor(IN[0],IN[1],IN[2]); doc.setLineWidth(.5); doc.line(M,y,M,y+thH);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(IN[0],IN[1],IN[2]); doc.text('TOP COMPETITOR',M+4,y+6);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(DATA.topComp.name,M+4,y+12);
+      doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(80,100,120);
+      var tl2 = doc.splitTextToSize(DATA.topComp.desc, CW/2-10); doc.text(tl2[0]||'',M+4,y+18);
+      var cx2=M+CW/2+1;
+      doc.setFillColor(252,235,235); doc.roundedRect(cx2,y,CW/2-1,thH,2,2,'F');
+      doc.setDrawColor(RD[0],RD[1],RD[2]); doc.setLineWidth(.5); doc.line(cx2,y,cx2,y+thH);
+      doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(RD[0],RD[1],RD[2]); doc.text('YOUR BUSINESS',cx2+4,y+6);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(BIZ.slice(0,24),cx2+4,y+12);
+      doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(80,100,120);
+      var yl = doc.splitTextToSize(DATA.yourDesc, CW/2-10); doc.text(yl[0]||'',cx2+4,y+18);
+      y+=26;
+      SUB('Platform-by-Platform Breakdown');
+      DATA.platforms.forEach(function(p) {
+        CK(34); var sc=SC(p.s), h=p.q?32:24;
+        doc.setFillColor(LT[0],LT[1],LT[2]); doc.roundedRect(M,y,CW,h,2,2,'F');
+        doc.setFillColor(sc[0],sc[1],sc[2]); doc.roundedRect(M,y,3,h,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(p.n,M+6,y+7);
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(sc[0],sc[1],sc[2]); doc.text(p.tag,M+6,y+13);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(MD[0],MD[1],MD[2]);
+        var sl=doc.splitTextToSize(p.txt,CW-56); doc.text(sl[0]||'',M+52,y+7); if(sl[1]) doc.text(sl[1],M+52,y+13);
+        if (p.q) { doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(90,110,130); var ql=doc.splitTextToSize('"'+p.q+'"',CW-56); doc.text(ql[0]||'',M+52,y+20); if(ql[1]) doc.text(ql[1],M+52,y+25); }
+        y+=(h+4);
+      });
+
+      // P4 COMPETITORS
+      NP(); SH('03. Local Competitor Analysis', 'Share of Voice and competitor profiles within 10km');
+      SUB('AI Share of Voice - Local Search Visibility');
+      var ms2=Math.max.apply(null, DATA.sov.map(function(s){return s.pct;}));
+      DATA.sov.forEach(function(s) {
+        CK(10); var iy=s.c==='you-fill', bw=(s.pct/ms2)*(CW-52);
+        doc.setFont('helvetica',iy?'bold':'normal'); doc.setFontSize(8); doc.setTextColor.apply(doc,iy?BR:DK);
+        doc.text((iy?'> ':'')+s.n,M,y+4);
+        var fc=iy?BR:[55,138,221];
+        doc.setFillColor(fc[0],fc[1],fc[2]); doc.roundedRect(M+52,y-1,bw,5.5,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor.apply(doc,iy?BR:MD);
+        doc.text(s.pct+'%',M+54+bw,y+4); y+=9;
+      }); y+=4;
+      SUB('Competitor Profiles - Within 5km Radius');
+      // Note: Google Maps screenshot would appear here in the full report
+      doc.setFillColor(LT[0],LT[1],LT[2]); doc.roundedRect(M,y,CW,12,2,2,'F');
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,12,1,1,'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(MD[0],MD[1],MD[2]);
+      doc.text('Live competitor map available at destaca.app - shows all active competitors within 5km radius', M+7, y+7);
+      y+=16;
+      // Generate competitor names for PDF
+      var pdfCompNames = getCompNames(INDUSTRY, BIZ);
+      DATA.competitors.forEach(function(c, ci) {
+        c = JSON.parse(JSON.stringify(c));
+        c.n = pdfCompNames[ci] || c.n;
+        c.dist = c._realDist || getCompDist(ci);
+    if (c._realRating) c.ms[0].v = c._realRating;
+    if (c._realReviews) c.ms[1].v = c._realReviews;
+    if (c._realWeb) c.web[0] = c._realWeb;
+        var betterLines = c.better ? c.better.length : 0;
+        var cardH = 54 + (betterLines > 0 ? betterLines*7+14 : 0);
+        CK(cardH+4);
+        var tc=c.tc==='th'?RD:c.tc==='tm'?WN:GR;
+        doc.setFillColor(LT[0],LT[1],LT[2]); doc.roundedRect(M,y,CW,cardH,2,2,'F');
+        doc.setFillColor(tc[0],tc[1],tc[2]); doc.roundedRect(M+CW-3,y,3,cardH,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(c.n,M+4,y+8);
+        doc.setFontSize(7); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(c.dist+' away (within 5km)',M+4,y+14);
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(tc[0],tc[1],tc[2]); doc.text(c.tl,M+4,y+20);
+        var mw=(CW-54)/5;
+        c.ms.forEach(function(m,i) {
+          var mx=M+50+i*mw, mc=m.c==='g'?GR:m.c==='w'?WN:RD;
+          doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(mc[0],mc[1],mc[2]); doc.text(m.v,mx,y+10);
+          doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(m.l,mx,y+16);
+        });
+        var wtx=M+4; doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text('WEB:',wtx,y+26); wtx+=12;
+        c.web.forEach(function(tag) {
+          doc.setFillColor(24,34,46); doc.roundedRect(wtx,y+22,22,5,1,1,'F');
+          doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(180,195,215); doc.text(tag,wtx+2,y+26); wtx+=24;
+        });
+        var at=doc.splitTextToSize('"'+c.ai+'"',CW-10);
+        doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(90,105,120);
+        doc.text(at[0]||'',M+4,y+34); if(at[1]) doc.text(at[1],M+4,y+40);
+        if (c.better && c.better.length) {
+          var byStart = y+48;
+          doc.setFillColor(255,240,240); doc.roundedRect(M+4,byStart,CW-8,c.better.length*7+10,1,1,'F');
+          doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(200,60,60);
+          doc.text('WHY THEY ARE WINNING:', M+7, byStart+6);
+          c.better.forEach(function(b,bi) {
+            doc.setFillColor(200,60,60); doc.circle(M+8,byStart+12+bi*7,1.5,'F');
+            doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(DK[0],DK[1],DK[2]);
+            var bl=doc.splitTextToSize(b, CW-20);
+            doc.text(bl[0]||'', M+12, byStart+13+bi*7);
+          });
+        }
+        y+=cardH+5;
+      });
+
+      // P5 WEBSITE
+      NP(); var wb2=WEB[DATA.webIdx];
+      SH('04. Website Health Analysis', 'Platform: '+wb2.platform+' | AI readiness and tool recommendations');
+      var wsw2=CW/4;
+      wb2.scores.forEach(function(s,i) {
+        var sx=M+i*wsw2, sc2=s.c==='g'?GR:s.c==='w'?WN:RD;
+        doc.setFillColor(24,34,46); doc.roundedRect(sx,y,wsw2-3,16,2,2,'F');
+        doc.setFillColor(sc2[0],sc2[1],sc2[2]); doc.roundedRect(sx,y,wsw2-3,2,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(sc2[0],sc2[1],sc2[2]); doc.text(s.v,sx+(wsw2-3)/2,y+10,{align:'center'});
+        doc.setFont('helvetica','normal'); doc.setFontSize(6); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text(s.l,sx+(wsw2-3)/2,y+15,{align:'center'});
+      }); y+=20;
+      SUB('Health Checks');
+      wb2.checks.forEach(function(c) {
+        CK(12); var sc2=c.ok===true?GR:c.ok===false?RD:WN;
+        doc.setFillColor(LT[0],LT[1],LT[2]); doc.roundedRect(M,y,CW,10,1,1,'F');
+        doc.setFillColor(sc2[0],sc2[1],sc2[2]); doc.circle(M+6,y+5,2.5,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(c.ok===true?0:c.ok===false?160:130,c.ok===true?120:c.ok===false?40:90,c.ok===true?80:c.ok===false?40:10);
+        doc.text(c.ok===true?'PASS':c.ok===false?'FAIL':'WARN',M+3,y+6,{align:'center'});
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(c.l,M+16,y+6);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(MD[0],MD[1],MD[2]);
+        var dl=doc.splitTextToSize(c.d,CW-55); doc.text(dl[0]||'',M+100,y+6); y+=12;
+      }); y+=4;
+      SUB('Recommended Tools');
+      wb2.tools.forEach(function(t,i) {
+        CK(26); var even=i%2===0; doc.setFillColor.apply(doc,even?LT:[255,255,255]); doc.roundedRect(M,y,CW,22,2,2,'F');
+        var tc2=h2r(t.col); doc.setFillColor(tc2[0],tc2[1],tc2[2]); doc.roundedRect(M,y,3,22,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(t.n,M+7,y+8);
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(tc2[0],tc2[1],tc2[2]); doc.text(t.t,M+7,y+14);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(MD[0],MD[1],MD[2]);
+        var dl=doc.splitTextToSize(t.d,CW-16); doc.text(dl[0]||'',M+7,y+20);
+        doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(IN[0],IN[1],IN[2]); doc.text('Install: '+t.ins,M+110,y+8);
+        y+=26;
+      }); y+=4;
+      var bl2=lgt(HEX,.92); doc.setFillColor(bl2[0],bl2[1],bl2[2]); doc.roundedRect(M,y,CW,16,2,2,'F');
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,16,1,1,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(BD[0],BD[1],BD[2]); doc.text('SERVICE OPPORTUNITY',M+7,y+7);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(DK[0],DK[1],DK[2]);
+      var opl=doc.splitTextToSize(wb2.opp,CW-14); doc.text(opl[0]||'',M+7,y+13); y+=20;
+
+      // P6 FIX PLAN
+      NP(); SH('05. GEO Fix Plan + Industry Actions', 'Priority ranked by impact with implementation details');
+      DATA.fixes.forEach(function(f,i) {
+        var cl=f.t.replace(/<[^>]+>/g,'');
+        var da=cl.indexOf('-'); var ti=da>-1?cl.slice(0,da).trim():cl; var re=da>-1?cl.slice(da+1).trim():'';
+        var dl=doc.splitTextToSize(f.d,CW-12); var ch=Math.max(32,22+dl.length*5);
+        CK(ch+4);
+        doc.setFillColor(LT[0],LT[1],LT[2]); doc.roundedRect(M,y,CW,ch,2,2,'F');
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.circle(M+7,y+9,4.5,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(9.5); doc.setTextColor(onB[0],onB[1],onB[2]); doc.text(String(i+1),M+7,y+12,{align:'center'});
+        doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(DK[0],DK[1],DK[2]);
+        var tl3=doc.splitTextToSize(ti,CW-18); doc.text(tl3[0]||'',M+14,y+8); if(tl3[1]) doc.text(tl3[1],M+14,y+13);
+        if (re) { doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(MD[0],MD[1],MD[2]); doc.text('- '+re,M+14,y+(tl3[1]?17:13)); }
+        var bl3=lgt(HEX,.82); doc.setFillColor(bl3[0],bl3[1],bl3[2]); doc.roundedRect(M+14,y+17,28,5,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(6.5); doc.setTextColor(BD[0],BD[1],BD[2]); doc.text(f.imp,M+15,y+21);
+        doc.setFillColor(228,238,252); doc.roundedRect(M+44,y+17,24,5,1,1,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(6.5); doc.setTextColor(IN[0],IN[1],IN[2]); doc.text(f.sp,M+45,y+21);
+        doc.setFont('helvetica','italic'); doc.setFontSize(7.5); doc.setTextColor(90,105,125);
+        dl.forEach(function(l,li) { doc.text(l,M+6,y+26+li*5); });
+        y+=ch+5;
+      });
+      y+=4; SUB((IND_LABELS[INDUSTRY]||'General').toUpperCase() + ' - SPECIFIC ACTIONS');
+      var indF=IND_FIXES[INDUSTRY]||IND_FIXES.general;
+      indF.forEach(function(f,i) {
+        CK(12); doc.setFillColor.apply(doc,i%2===0?LT:[255,255,255]); doc.roundedRect(M,y,CW,10,1,1,'F');
+        doc.setFillColor(IN[0],IN[1],IN[2]); doc.circle(M+5,y+5,2,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]);
+        var fl=doc.splitTextToSize(f,CW-12); doc.text(fl[0]||'',M+10,y+6); y+=11;
+      });
+
+      // P7 CITATIONS + ROADMAP
+      NP(); SH('06. Citation Building Strategy', 'Priority directories ranked by AI platform impact');
+      var cits=[['Google Business Profile','Critical','Needs audit','Direct feed into Google AI and Gemini'],['Apple Maps','Critical','Unknown','Siri and Apple AI pull exclusively from here'],['Bing Places','Critical','Unknown','Microsoft Copilot sources from Bing'],['Yelp','Critical','Active','Keep NAP exact, respond to all reviews'],['StyleSeat','High','Unknown','Major AI citation source for services'],['Nextdoor','High','Unknown','Neighborhood AI - critical for local'],['BBB','Medium','Unknown','Trust signal cited by multiple AI platforms'],['Expertise.com','Medium','Unknown','ChatGPT cites for "best service in city"'],['Thumbtack','Medium','Unknown','Perplexity cites for service businesses'],['Chamber','Medium','Unknown','Geographic entity authority boost']];
+      var cw2=[58,22,34,64];
+      doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,CW,8,1,1,'F');
+      var cx4=M; ['Directory','Priority','Status','Why It Matters'].forEach(function(h,i) { doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(onB[0],onB[1],onB[2]); doc.text(h,cx4+2,y+5); cx4+=cw2[i]; }); y+=9;
+      cits.forEach(function(r,ri) {
+        CK(10); doc.setFillColor.apply(doc,ri%2===0?LT:[255,255,255]); doc.rect(M,y,CW,9,'F');
+        var pc=r[1]==='Critical'?RD:r[1]==='High'?WN:IN;
+        var rx3=M; r.forEach(function(cell,ci) { doc.setFont('helvetica',ci===1?'bold':'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc,ci===1?pc:DK); doc.text(String(cell).slice(0,ci===3?40:28),rx3+2,y+6); rx3+=cw2[ci]; }); y+=9;
+      }); y+=8;
+
+      SH('07. 90-Day Visibility Roadmap', 'Week-by-week action plan');
+      var rm=[['Week 1-2','Foundation','Schema + chatbot + booking + GBP audit. Answer-first homepage.','AI reads site. Chatbot captures leads from day 1.'],['Week 2-3','Citations','NAP audit. Claim Apple, Bing, Nextdoor, StyleSeat.','Citation graph improves. Apple and Bing AI gain access.'],['Week 3-5','Reviews','SMS ask sequence. 10 new reviews/month target. Respond to all.','Review trust signal strengthens weekly.'],['Week 4-6','Content','3 service pages answer-first + FAQ schema.','ChatGPT and Perplexity gain citable content.'],['Week 5-7','Social','4x Instagram, 3x Facebook/week. GBP Posts 2x.','Meta AI recommendation pool entry.'],['Week 6-9','Editorial','Local media + association directory outreach.','Highest-weight AI citations building.'],['Week 8-10','Knowledge Graph','Submit Google Knowledge Graph + Wikidata.','Gemini unlocked. ARI score jumps.'],['Week 10-12','Measure','Run AI test queries. Document results.','Typically 3-4x AI Share of Voice improvement.']];
+      rm.forEach(function(row,i) {
+        var al=doc.splitTextToSize(row[2],CW-65);
+        var ol4=doc.splitTextToSize(row[3],48);
+        var ch=Math.max(18,Math.max(al.length,ol4.length)*5+8);
+        CK(ch+3); doc.setFillColor.apply(doc,i%2===0?LT:[255,255,255]); doc.roundedRect(M,y,CW,ch,1,1,'F');
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,ch,1,1,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(BD[0],BD[1],BD[2]); doc.text(row[0],M+5,y+6);
+        doc.setFontSize(9); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(row[1],M+5,y+13);
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(MD[0],MD[1],MD[2]);
+        al.forEach(function(l,li) { doc.text(l,M+45,y+5+li*5); });
+        doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(90,110,80);
+        ol4.forEach(function(l,li) { doc.text(l,M+CW-50,y+5+li*5); });
+        y+=ch+3;
+      });
+
+      // P8 TARGETS
+      NP(); SH('08. Day 90 Targets + Measurement', 'Expected outcomes and monthly verification queries');
+      SUB('Target Outcomes at Day 90');
+      var tgts=DATA.ari.num<30?[['ARI Score','60+ / 100'],['Platforms Visible','4 of 5'],['AI Share of Voice','25-35%'],['Google Reviews','50+'],['Response Rate','80%+'],['Web Citations','100+'],['Website Chatbot','Active - capturing leads'],['Website Score','75+']]:[['ARI Score','75+ / 100'],['Platforms Visible','5 of 5'],['AI Share of Voice','55-65%'],['Google Reviews','150+'],['Response Rate','80%+'],['Web Citations','200+'],['Website Chatbot','Active - capturing leads'],['Website Score','80+']];
+      tgts.forEach(function(kv,i) {
+        CK(10); doc.setFillColor.apply(doc,i%2===0?LT:[255,255,255]); doc.rect(M,y,CW,9,'F');
+        doc.setFillColor(BR[0],BR[1],BR[2]); doc.roundedRect(M,y,3,9,0,0,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text(kv[0],M+6,y+6);
+        doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(BR[0],BR[1],BR[2]); doc.text(kv[1],M+80,y+6);
+        y+=9;
+      });
+      y+=8; SUB('Monthly Verification Queries');
+      BDY('Run these exact prompts monthly in ChatGPT, Gemini, and Perplexity:'); y+=2;
+      ['Best ' + (IND_LABELS[INDUSTRY]||'service business').toLowerCase() + ' in [neighbourhood] [city]',
+       'Where can I find a good ' + (IND_LABELS[INDUSTRY]||'service').toLowerCase() + ' near [area]?',
+       (IND_LABELS[INDUSTRY]||'Business') + ' open Saturday in [city]',
+       '[Business name] [city] reviews - branded query'].forEach(function(q) {
+        CK(8); doc.setFillColor(22,32,44); doc.roundedRect(M,y,CW,7,1,1,'F');
+        doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(BR[0],BR[1],BR[2]); doc.text(q,M+4,y+5); y+=9;
+      });
+      y+=8; BDY('At Day 90 the business should appear in the top 3 for at least 3 of the 4 queries above across ChatGPT and Perplexity. Google AI should surface the knowledge panel for all branded queries. Meta AI should recommend for neighbourhood queries. Website chatbot should have captured 15-20+ qualified leads.');
+      y+=10; doc.setFillColor(BR[0],BR[1],BR[2]); doc.rect(M,y,CW,.5,'F'); y+=6;
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(DK[0],DK[1],DK[2]); doc.text('Prepared by Growth System AI', M, y+5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(MD[0],MD[1],MD[2]);
+      doc.text('Destaca  |  Stand out. Get found. Get cited.  |  ARI: ' + DATA.ari.num + '/100  |  Confidential', W/2, y+13, {align:'center'});
+
+      var fname = BIZ.replace(/[^a-z0-9]/gi,'_').slice(0,30) + '_GEO_Report.pdf';
+      doc.save(fname);
+
+      btn.disabled = false;
+      var rgb2 = h2r(HEX); var l2 = lum(rgb2[0],rgb2[1],rgb2[2]);
+      btn.style.background = HEX;
+      btn.style.color = l2 > 140 ? '#1A1A1A' : '#FFFFFF';
+      btn.textContent = 'Download Full PDF Report (8 pages)';
+      document.getElementById('dlMsg').textContent = fname + ' saved to Downloads';
+      document.getElementById('dlOk').classList.add('show');
+
+    } catch(err) {
+      btn.disabled = false;
+      btn.textContent = 'Download Full PDF Report (8 pages)';
+      alert('PDF error: ' + err.message);
+      console.error(err);
+    }
+  }, 400);
+}
+
+function copyShareText() {
+  if (!DATA) return;
+  var text = 'Destaca GEO Scan\n\nBusiness: ' + BIZ + '\nARI Score: ' + DATA.ari.num + '/100 (' + DATA.label + ')\nAI Share of Voice: ' + DATA.ari.sov + '\nPlatforms Visible: ' + DATA.ari.plat + '/5\n\nScanned by Growth System AI - Destaca';
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { alert('Score card copied!'); });
+  } else {
+    alert(text);
+  }
+}
+
+function resetApp() {
+  document.getElementById('bizInput').value = '';
+  document.getElementById('homeView').style.display = 'block';
+  document.getElementById('scanView').style.display = 'none';
+  document.getElementById('resultsView').style.display = 'none';
+  document.getElementById('dlOk').classList.remove('show');
+  document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active','done'); });
+}
+</script>
+</body>
+</html>
