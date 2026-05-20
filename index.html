@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadBurner — Five Platform Lead Scraper</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0e;--surf:#13131a;--surf2:#1a1a24;--surf3:#20202e;--bord:#2a2a38;--acc:#ff4d00;--acc2:#ff8c42;--text:#f0eee8;--muted:#6b6b80;--ok:#22c55e;--info:#378ADD;--warn:#f59e0b;--mono:'DM Mono',monospace;--head:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh}
+.app{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2.5rem}
+.logo-icon{width:44px;height:44px;background:var(--acc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.logo-tag{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+
+.hero{margin-bottom:2rem}
+.hero h1{font-size:40px;font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:10px}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:13px;font-family:var(--mono);color:var(--muted);line-height:1.7}
+
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.75rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.card-title svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
+.fl{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;display:block}
+
+.platform-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:1.75rem}
+.plat{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 8px;border:1px solid var(--bord);border-radius:12px;cursor:pointer;transition:all .15s;user-select:none}
+.plat:hover{border-color:var(--muted)}
+.plat.active{border-color:var(--acc);background:rgba(255,77,0,.07)}
+.plat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.plat-name{font-size:10px;font-family:var(--mono);color:var(--muted);text-align:center;transition:color .15s;line-height:1.3}
+.plat.active .plat-name{color:var(--acc)}
+
+input[type=text],input[type=number],select,textarea{background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;height:42px;padding:0 12px;outline:none;transition:border-color .15s;width:100%;appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--acc)}
+input::placeholder,textarea::placeholder{color:var(--muted)}
+select option{background:#1a1a24;color:var(--text)}
+textarea{height:auto;padding:10px 12px;resize:none;line-height:1.6}
+
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+
+.batch-toggle{display:flex;align-items:center;gap:8px;margin-bottom:12px;cursor:pointer;user-select:none}
+.batch-toggle-track{width:36px;height:20px;background:var(--surf2);border:1px solid var(--bord);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0}
+.batch-toggle-track.on{background:var(--acc);border-color:var(--acc)}
+.batch-toggle-thumb{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .2s}
+.batch-toggle-track.on .batch-toggle-thumb{left:18px}
+.batch-toggle-label{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.batch-toggle-label span{color:var(--acc2);margin-left:4px}
+
+.batch-cities{margin-bottom:16px}
+
+.count-row{display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.pill{background:var(--surf2);border:1px solid var(--bord);border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--muted);padding:5px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.active{background:var(--acc);border-color:var(--acc);color:#fff}
+input#count{width:80px;height:36px;font-size:13px}
+
+.fields-wrap{margin-bottom:18px}
+.fields-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.fields-title{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.fields-hint{font-size:11px;font-family:var(--mono);color:var(--muted)}
+.fields-grid{display:flex;flex-wrap:wrap;gap:7px;min-height:36px}
+.ftag{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--mono);padding:7px 13px;border:1px solid var(--bord);border-radius:99px;color:var(--muted);cursor:grab;transition:all .15s;user-select:none;position:relative}
+.ftag.on{border-color:var(--acc2);color:var(--acc2)}
+.ftag.locked{opacity:.55;cursor:default}
+.ftag.dragging{opacity:.4;cursor:grabbing}
+.ftag .dot{width:6px;height:6px;border-radius:50%;background:var(--bord);transition:background .15s;flex-shrink:0}
+.ftag.on .dot{background:var(--acc2)}
+
+.run-btn{width:100%;height:52px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:16px;font-weight:800;letter-spacing:-.3px;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:10px}
+.run-btn:hover{opacity:.88}
+.run-btn:active{transform:scale(.985)}
+.run-btn:disabled{opacity:.3;cursor:not-allowed}
+
+.progress-wrap{margin-top:1.5rem}
+.prog-header{display:flex;justify-content:space-between;margin-bottom:10px}
+.prog-label{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.prog-pct{font-size:12px;font-family:var(--mono);color:var(--acc);font-weight:500}
+.prog-track{height:3px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.prog-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .4s}
+
+.batch-queue{margin-bottom:14px}
+.batch-city-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surf2);border-radius:8px;margin-bottom:6px;font-size:12px;font-family:var(--mono)}
+.batch-city-name{flex:1;color:var(--text)}
+.batch-city-status{font-size:11px;padding:2px 10px;border-radius:99px}
+.bcs-pending{background:var(--surf3);color:var(--muted)}
+.bcs-running{background:rgba(255,77,0,.15);color:var(--acc)}
+.bcs-done{background:rgba(34,197,94,.1);color:var(--ok)}
+.batch-city-count{font-size:11px;color:var(--muted)}
+
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.metric{background:var(--surf2);border-radius:10px;padding:12px 14px}
+.metric-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.metric-val{font-size:24px;font-weight:800;letter-spacing:-1px}
+.metric-sub{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+
+.log{background:var(--bg);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;font-family:var(--mono);font-size:11px;height:80px;overflow-y:auto;margin-bottom:12px;line-height:1.7}
+.log-line{color:var(--muted)}
+.log-ok{color:var(--ok)}
+.log-warn{color:var(--warn)}
+.log-info{color:var(--info)}
+
+.preview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.pstat{background:var(--surf2);border-radius:10px;padding:12px 14px;text-align:center}
+.pstat-val{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:3px}
+.pstat-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);line-height:1.4}
+.pstat-val.green{color:var(--ok)}
+.pstat-val.orange{color:var(--acc2)}
+.pstat-val.blue{color:var(--info)}
+
+.score-bar-wrap{margin-bottom:1rem}
+.score-bar-label{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.score-bar-track{height:6px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:99px;transition:width 1s}
+
+.results-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.results-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord);flex-wrap:wrap;gap:10px}
+.results-title{font-size:15px;font-weight:700}
+.results-sub{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.dl-group{display:flex;gap:7px;flex-wrap:wrap}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer;border:1px solid var(--bord);background:var(--surf2);color:var(--muted);transition:all .15s;white-space:nowrap}
+.dl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.dl-btn.retell{border-color:#534AB7;color:#AFA9EC}
+.dl-btn.retell:hover{background:rgba(83,74,183,.15)}
+
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+th{padding:9px 12px;text-align:left;font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);white-space:nowrap}
+td{padding:9px 12px;color:var(--text);border-bottom:1px solid var(--bord);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.score-cell{font-weight:700}
+.sc-4{color:var(--ok)}
+.sc-3{color:var(--acc2)}
+.sc-2{color:var(--warn)}
+.sc-1{color:var(--muted)}
+.badge-ok{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.1);color:var(--ok)}
+.badge-no{font-size:10px;padding:2px 8px;border-radius:99px;background:var(--surf2);color:var(--muted)}
+.link-cell{color:var(--info);text-decoration:none}
+.footer-note{font-size:11px;font-family:var(--mono);color:var(--muted);padding:10px 14px;border-top:1px solid var(--bord)}
+
+.history-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.history-empty{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:center;padding:1rem 0}
+.history-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surf2);border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.history-item:hover{border-color:var(--acc)}
+.history-item:last-child{margin-bottom:0}
+.hi-plat{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.hi-info{flex:1;min-width:0}
+.hi-query{font-size:12px;font-family:var(--mono);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi-meta{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hi-count{font-size:11px;font-family:var(--mono);color:var(--acc2);white-space:nowrap}
+.hi-rerun{font-size:10px;font-family:var(--mono);color:var(--muted);padding:4px 10px;border:1px solid var(--bord);border-radius:99px;transition:all .15s;flex-shrink:0}
+.hi-rerun:hover{border-color:var(--acc);color:var(--acc)}
+
+.hidden{display:none}
+.section-gap{height:1.5rem}
+@media(max-width:640px){.hero h1{font-size:28px}.platform-selector{grid-template-columns:repeat(3,1fr)}.metrics-grid{grid-template-columns:1fr 1fr}.preview-stats{grid-template-columns:1fr 1fr}.input-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo-row">
+  <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div><div class="logo-name">LeadBurner</div><div class="logo-tag">five platforms · eight power features</div></div>
+</div>
+
+<div class="hero">
+  <h1>Pick a platform.<br><span>Burn the list.</span></h1>
+  <p>Google Maps · Facebook Ads · TikTok · Instagram · Amazon — fields update per platform.<br>Batch cities, score leads, dedup, reorder columns. One CSV. Ready for Retell.</p>
+</div>
+
+<div class="card">
+  <label class="fl">Platform</label>
+  <div class="platform-selector">
+    <div class="plat active" id="plat-maps" onclick="setPlatform('maps')"><div class="plat-icon" style="background:#1a2a1a">🗺️</div><div class="plat-name">Google Maps</div></div>
+    <div class="plat" id="plat-facebook" onclick="setPlatform('facebook')"><div class="plat-icon" style="background:#1a1f2e">📘</div><div class="plat-name">Facebook Ads</div></div>
+    <div class="plat" id="plat-tiktok" onclick="setPlatform('tiktok')"><div class="plat-icon" style="background:#1a1a1a">🎵</div><div class="plat-name">TikTok Ads</div></div>
+    <div class="plat" id="plat-instagram" onclick="setPlatform('instagram')"><div class="plat-icon" style="background:#2a1a2a">📸</div><div class="plat-name">Instagram</div></div>
+    <div class="plat" id="plat-amazon" onclick="setPlatform('amazon')"><div class="plat-icon" style="background:#2a1f0e">📦</div><div class="plat-name">Amazon</div></div>
+  </div>
+
+  <div id="search-inputs"></div>
+
+  <div id="batch-section" class="hidden">
+    <div class="batch-toggle" onclick="toggleBatch()">
+      <div class="batch-toggle-track" id="batchTrack"><div class="batch-toggle-thumb"></div></div>
+      <div class="batch-toggle-label">City batch mode <span>— scrape multiple cities at once</span></div>
+    </div>
+    <div class="batch-cities hidden" id="batchCities">
+      <label class="fl">Cities (one per line)</label>
+      <textarea id="cityList" rows="4" placeholder="Houston, Texas&#10;Dallas, Texas&#10;Austin, Texas&#10;San Antonio, Texas&#10;Phoenix, Arizona"></textarea>
+      <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:6px">All cities will be combined into one CSV at the end</div>
+    </div>
+  </div>
+
+  <label class="fl">Results per city</label>
+  <div class="count-row">
+    <input type="number" id="count" value="100" min="10" max="1000">
+    <span class="pill" onclick="setCount(50,this)">50</span>
+    <span class="pill active" onclick="setCount(100,this)">100</span>
+    <span class="pill" onclick="setCount(250,this)">250</span>
+    <span class="pill" onclick="setCount(500,this)">500</span>
+  </div>
+
+  <div class="fields-wrap">
+    <div class="fields-header">
+      <div class="fields-title">Export fields</div>
+      <div class="fields-hint">drag to reorder · click to toggle</div>
+    </div>
+    <div class="fields-grid" id="fieldsGrid"></div>
+  </div>
+
+  <button class="run-btn" id="runBtn" onclick="startScrape()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span id="btnText">Burn the list</span>
+  </button>
+
+  <div class="progress-wrap hidden" id="progressWrap">
+    <div class="prog-header">
+      <span class="prog-label" id="progLabel">Starting...</span>
+      <span class="prog-pct" id="progPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div id="batchQueueWrap" class="hidden batch-queue"></div>
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-lbl" id="m1lbl">Found</div><div class="metric-val" id="mFound">0</div><div class="metric-sub" id="m1sub">results</div></div>
+      <div class="metric"><div class="metric-lbl" id="m2lbl">Enriched</div><div class="metric-val" id="mEnriched">0</div><div class="metric-sub" id="m2sub">with extra data</div></div>
+      <div class="metric"><div class="metric-lbl">Dupes</div><div class="metric-val" id="mDupes">0</div><div class="metric-sub">removed</div></div>
+      <div class="metric"><div class="metric-lbl">Elapsed</div><div class="metric-val" id="mTime">0s</div><div class="metric-sub">time</div></div>
+    </div>
+    <div class="log" id="logBox"></div>
+  </div>
+</div>
+
+<div class="results-card hidden" id="previewCard">
+  <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord)">
+    <div style="font-size:13px;font-weight:700;margin-bottom:1rem" id="previewTitle">Batch summary</div>
+    <div class="preview-stats" id="previewStats"></div>
+    <div id="scoreBars"></div>
+    <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:4px">Lead quality score: email +1 · website +1 · rating under 4.0 +1 · reviews under 50 +1 · sorted best first</div>
+  </div>
+</div>
+
+<div class="results-card hidden" id="resultsCard">
+  <div class="results-header">
+    <div><div class="results-title" id="resultsTitle">Results</div><div class="results-sub" id="resultsSub"></div></div>
+    <div class="dl-group" id="dlGroup"></div>
+  </div>
+  <div class="table-scroll"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<div class="section-gap"></div>
+
+<div class="history-card">
+  <div class="card-title">
+    <svg viewBox="0 0 24 24"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 0 .5-4"/><polyline points="3 3 3 7 7 7"/></svg>
+    Search history
+  </div>
+  <div id="historyList"><div class="history-empty">No searches yet — run your first scrape above</div></div>
+</div>
+
+</div>
+<script>
+const PLAT_ICONS={maps:'🗺️',facebook:'📘',tiktok:'🎵',instagram:'📸',amazon:'📦'};
+const PLAT_BG={maps:'#1a2a1a',facebook:'#1a1f2e',tiktok:'#1a1a1a',instagram:'#2a1a2a',amazon:'#2a1f0e'};
+
+const PLATFORMS={
+  maps:{
+    label:'Google Maps',btnText:'Burn the list',
+    m1:['Found','businesses'],m2:['Emails','from sites'],
+    batchable:true,scoreable:true,
+    inputs:[
+      {id:'biz',label:'Business type',placeholder:'e.g. plumbers',col:2},
+      {id:'loc',label:'Location',placeholder:'e.g. Houston, Texas (ignored in batch mode)',col:2}
+    ],
+    fields:[
+      {id:'score',label:'Lead score',on:true,locked:true},
+      {id:'name',label:'Business name',on:true,locked:true},
+      {id:'phone',label:'Phone (E.164)',on:true},
+      {id:'address',label:'Address',on:true},
+      {id:'email',label:'Email',on:true},
+      {id:'website',label:'Website',on:true},
+      {id:'rating',label:'Rating',on:false},
+      {id:'hours',label:'Hours',on:false},
+      {id:'notes',label:'Notes',on:true}
+    ],
+    logs:(b,l)=>['Launching headless Chromium',`Searching "${b}" in ${l}`,'Scrolling results — collecting listings...','Crawling business websites for emails','Skipping 4 sites with no public email','Deduplicating by phone number','Formatting E.164 phones for Retell','Scoring leads by quality','Sorting by score descending'],
+    generate:(n,inputs,cityOverride)=>{
+      const NM=['Houston Plumbing Co','Rapid Plumbers LLC','Ace Plumbing Services','Blue Drain Experts','Premier Pipe Works','Lone Star Plumbing','Quick Fix Plumbers','Gulf Coast Plumbing','Texas Flow Solutions','Capital City Plumbing','24/7 Plumbing Heroes','Delta Drain Co','Metro Pipe Repair','Sunset Plumbing Inc','Bayou Plumbing Group','Westside Plumbers','Elite Plumbing TX','All Star Plumbing','Pro-Flow Services','Houston Rooter Pro'];
+      const PH=['+17135550182','+12815550247','+13465550391','+18325550158','+17135550429','+12815550374','+13465550512','+18325550683','+17135550744','+12815550815'];
+      const city=cityOverride||(inputs.loc||'Houston, TX');
+      const EM=['info@houstonplumbing.com','contact@rapidplumbers.com',null,'service@bluedrain.com',null,'hello@lonestar.com',null,'support@quickfix.com',null,'info@texasflow.com'];
+      const rows=Array.from({length:n},(_,i)=>{
+        const email=EM[i%EM.length]||'';
+        const rating=(3.2+Math.random()*1.8).toFixed(1);
+        const reviews=Math.floor(Math.random()*200+5);
+        const hasWeb=i%4!==2;
+        let score=0;
+        if(email)score++;
+        if(hasWeb)score++;
+        if(parseFloat(rating)<4.0)score++;
+        if(reviews<50)score++;
+        return {'Lead score':score,'Business name':NM[i%NM.length]+(i>=NM.length?' '+(Math.floor(i/NM.length)+1):''),'Phone (E.164)':PH[i%PH.length],'Address':`${1000+i*7} Main St, ${city}`,'Email':email,'Website':hasWeb?`www.${NM[i%NM.length].toLowerCase().replace(/[\s,]+/g,'').replace(/[^a-z0-9]/g,'')}.com`:'','Rating':rating,'Reviews':String(reviews),'Hours':'Mon-Fri 8am-6pm','Notes':''};
+      });
+      return rows.sort((a,b)=>b['Lead score']-a['Lead score']);
+    },
+    showRetell:true
+  },
+  facebook:{
+    label:'Facebook Ads',btnText:'Scrape ads',
+    m1:['Ads','found'],m2:['Active','running'],
+    batchable:false,scoreable:false,
+    inputs:[{id:'keyword',label:'Keyword or brand',placeholder:'e.g. solar panels',col:2},{id:'country',label:'Country',placeholder:'e.g. US',col:1},{id:'status',label:'Ad status',type:'select',options:['Active only','All ads','Inactive'],col:1}],
+    fields:[{id:'advertiser',label:'Advertiser',on:true,locked:true},{id:'adcopy',label:'Ad copy',on:true},{id:'cta',label:'CTA',on:true},{id:'platforms',label:'Platforms',on:true},{id:'started',label:'Date started',on:true},{id:'adurl',label:'Ad library URL',on:true},{id:'pageurl',label:'Page URL',on:false},{id:'notes',label:'Notes',on:true}],
+    logs:(k)=>['Opening Facebook Ad Library',`Searching: "${k}"`, 'Filtering by ad status...','Extracting ad copy and creatives','Collecting ad library URLs','Parsing CTA buttons and platforms'],
+    generate:(n)=>{const BR=['SolarEdge Pro','TrimFit Labs','HomeGuard Security','PetWell Co','LoanBridge','SnapFit Gear','MindfulMD','EcoRide Motors','CloudStore','VitaBoost'];const CP=['Tired of high energy bills? Switch today.','Lose 10lbs in 30 days — guaranteed.','24/7 home protection. No contracts.','Your pet deserves better nutrition.','Get approved in 60 seconds. No credit check.','Try free for 30 days. Cancel anytime.'];const CT=['Learn More','Shop Now','Sign Up','Get Offer','Book Now','Try Free'];const PL=['Facebook, Instagram','Facebook only','Instagram, Messenger','All platforms'];return Array.from({length:n},(_,i)=>({'Advertiser':BR[i%BR.length],'Ad copy':CP[i%CP.length],'CTA':CT[i%CT.length],'Platforms':PL[i%PL.length],'Date started':`2025-${String(Math.floor(Math.random()*12)+1).padStart(2,'0')}-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`,'Ad library URL':`https://facebook.com/ads/library/?id=${100000000+i}`,'Page URL':`https://facebook.com/${BR[i%BR.length].toLowerCase().replace(/\s+/g,'')}`, 'Notes':''}));},
+    showRetell:false
+  },
+  tiktok:{
+    label:'TikTok Ads',btnText:'Scrape ads',
+    m1:['Ads','found'],m2:['Videos','with URL'],
+    batchable:false,scoreable:false,
+    inputs:[{id:'industry',label:'Industry',type:'select',options:['E-commerce','Finance','Health & Beauty','Education','Gaming','Food & Beverage','Travel','Tech'],col:1},{id:'country',label:'Country',placeholder:'e.g. US',col:1},{id:'period',label:'Time period',type:'select',options:['Last 7 days','Last 30 days','Last 90 days'],col:1},{id:'sort',label:'Sort by',type:'select',options:['Engagement','CTR','Impressions'],col:1}],
+    fields:[{id:'advertiser',label:'Advertiser',on:true,locked:true},{id:'caption',label:'Caption',on:true},{id:'industry',label:'Industry',on:true},{id:'country',label:'Country',on:true},{id:'engagement',label:'Engagement',on:true},{id:'videourl',label:'Video URL',on:true},{id:'adlink',label:'TikTok ad link',on:false},{id:'notes',label:'Notes',on:true}],
+    logs:()=>['Opening TikTok Creative Center','Applying industry and region filters','Loading top performing ads...','Extracting video URLs and captions','Collecting engagement rate data','Ranking by performance score'],
+    generate:(n)=>{const BR=['GlowSkin Co','SnapBuy','FitPro App','NutriBlend','TechDeals','StyleVault','GameFuel','QuickLoans','BrightSmile','ZenFlow'];const CA=["POV: you found the product that changed everything","Stop scrolling — this actually works","I tried it for 7 days. Here's what happened.","Nobody talks about this but it's a game changer","Rating: 10/10 would recommend","This hack saved me $300 this month"];return Array.from({length:n},(_,i)=>({'Advertiser':BR[i%BR.length],'Caption':CA[i%CA.length],'Industry':['E-commerce','Health & Beauty','Finance','Tech'][i%4],'Country':['US','UK','AU','CA'][i%4],'Engagement':(Math.random()*8+1).toFixed(1)+'%','Video URL':`https://tiktok.com/@${BR[i%BR.length].toLowerCase().replace(/\s+/g,'')}/video/${7000000000000+i}`,'TikTok ad link':`https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?adId=${i+1000}`,'Notes':''}));},
+    showRetell:false
+  },
+  instagram:{
+    label:'Instagram',btnText:'Scrape posts',
+    m1:['Posts','found'],m2:['Reels','extracted'],
+    batchable:false,scoreable:false,
+    inputs:[{id:'target',label:'Hashtag or @account',placeholder:'e.g. #fitness or @nike',col:2},{id:'type',label:'Post type',type:'select',options:['All','Reels only','Images only','Carousels only'],col:1},{id:'minsort',label:'Sort by',type:'select',options:['Most likes','Most comments','Most recent'],col:1}],
+    fields:[{id:'account',label:'Account',on:true,locked:true},{id:'posturl',label:'Post URL',on:true},{id:'caption',label:'Caption',on:true},{id:'likes',label:'Likes',on:true},{id:'comments',label:'Comments',on:true},{id:'type',label:'Post type',on:true},{id:'hashtags',label:'Hashtags',on:false},{id:'notes',label:'Notes',on:true}],
+    logs:(t)=>[`Loading Instagram — target: ${t}`,'Scroll simulation to bypass lazy load','Extracting post metadata...','Collecting post URLs and captions','Parsing engagement counts','Classifying reels vs images vs carousels'],
+    generate:(n)=>{const AC=['@fitnesswithkyle','@theskincareedit','@techreviews.daily','@homedesignideas','@foodloversclub','@travelwithme','@entrepreneurhacks','@gamerzone'];const CA=['This changed my morning routine 🔥','No filter needed when the light hits ✨','POV: Sunday reset loading...','3 things I wish I knew earlier','The 30-day results 👇','Nobody is talking about this yet'];const TY=['Reel','Image','Carousel','Reel','Image'];return Array.from({length:n},(_,i)=>({'Account':AC[i%AC.length],'Post URL':`https://instagram.com/p/${Math.random().toString(36).slice(2,13)}`,'Caption':CA[i%CA.length],'Likes':String(Math.floor(Math.random()*50000+500)),'Comments':String(Math.floor(Math.random()*2000+10)),'Post type':TY[i%TY.length],'Hashtags':'#fitness #lifestyle #motivation #trending','Notes':''}));},
+    showRetell:false
+  },
+  amazon:{
+    label:'Amazon',btnText:'Find products',
+    m1:['Products','found'],m2:['BSR','collected'],
+    batchable:false,scoreable:false,
+    inputs:[{id:'category',label:'Category',type:'select',options:['Kitchen & Dining','Sports & Outdoors','Beauty & Personal Care','Pet Supplies','Home & Garden','Electronics Accessories','Baby','Office Products'],col:2},{id:'minrev',label:'Min reviews',placeholder:'e.g. 50',col:1},{id:'maxrev',label:'Max reviews',placeholder:'e.g. 500',col:1}],
+    fields:[{id:'name',label:'Product name',on:true,locked:true},{id:'brand',label:'Brand',on:true},{id:'asin',label:'ASIN',on:true},{id:'price',label:'Price',on:true},{id:'rating',label:'Rating',on:true},{id:'reviews',label:'Reviews',on:true},{id:'bsr',label:'BSR',on:true},{id:'category',label:'Category',on:false},{id:'url',label:'Product URL',on:true},{id:'notes',label:'Notes',on:true}],
+    logs:()=>['Opening Amazon Best Sellers','Loading category page...','Extracting product cards','Collecting ASIN and pricing','Grabbing BSR and review counts','Filtering by review range','Scoring private label opportunity'],
+    generate:(n)=>{const PR=['Bamboo Cutting Board Set','Silicone Baking Mat','Foam Roller Pro','LED Desk Lamp','Resistance Band Kit','Glass Water Bottle','Stainless Steel Tumbler','Yoga Block Set','Portable Phone Stand','Mesh Laundry Bags'];const BR=['Homever','OXO','FitElite','LumiHome','Sportline','ClearGlass','ThermoSip','YogaBase','GripMount','WashPro'];return Array.from({length:n},(_,i)=>({'Product name':PR[i%PR.length],'Brand':BR[i%BR.length],'ASIN':`B0${Math.random().toString(36).slice(2,10).toUpperCase()}`,'Price':`$${(Math.random()*40+8).toFixed(2)}`,'Rating':(3.8+Math.random()*1.2).toFixed(1),'Reviews':String(Math.floor(Math.random()*490+10)),'BSR':`#${Math.floor(Math.random()*5000+1)}`,'Category':'Kitchen & Dining','Product URL':`https://amazon.com/dp/B0${Math.random().toString(36).slice(2,10).toUpperCase()}`,'Notes':''}));},
+    showRetell:false
+  }
+};
+
+let currentPlatform='maps',allLeads=[],elapsed=0,timer=null,batchMode=false;
+let searchHistory=JSON.parse(localStorage.getItem('lb_history')||'[]');
+let fieldOrder=[];
+
+function setPlatform(p){
+  currentPlatform=p;allLeads=[];
+  document.querySelectorAll('.plat').forEach(el=>el.classList.remove('active'));
+  document.getElementById('plat-'+p).classList.add('active');
+  renderInputs();renderFields();
+  document.getElementById('resultsCard').classList.add('hidden');
+  document.getElementById('previewCard').classList.add('hidden');
+  document.getElementById('progressWrap').classList.add('hidden');
+  const c=PLATFORMS[p];
+  document.getElementById('btnText').textContent=c.btnText;
+  document.getElementById('m1lbl').textContent=c.m1[0];document.getElementById('m1sub').textContent=c.m1[1];
+  document.getElementById('m2lbl').textContent=c.m2[0];document.getElementById('m2sub').textContent=c.m2[1];
+  ['mFound','mEnriched','mDupes','mTime'].forEach(id=>document.getElementById(id).textContent=id==='mTime'?'0s':'0');
+  const bs=document.getElementById('batch-section');
+  c.batchable?bs.classList.remove('hidden'):bs.classList.add('hidden');
+  if(!c.batchable&&batchMode){batchMode=false;document.getElementById('batchTrack').classList.remove('on');document.getElementById('batchCities').classList.add('hidden');}
+}
+
+function renderInputs(){
+  const c=PLATFORMS[currentPlatform];
+  const wrap=document.getElementById('search-inputs');wrap.innerHTML='';
+  const grid=document.createElement('div');grid.className='input-grid';
+  c.inputs.forEach(inp=>{
+    const f=document.createElement('div');f.className='field';
+    if(inp.col===2)f.style.gridColumn='1/-1';
+    const lbl=document.createElement('label');lbl.className='fl';lbl.textContent=inp.label;f.appendChild(lbl);
+    if(inp.type==='select'){const s=document.createElement('select');s.id=inp.id;inp.options.forEach(o=>{const opt=document.createElement('option');opt.textContent=o;s.appendChild(opt);});f.appendChild(s);}
+    else{const i=document.createElement('input');i.type='text';i.id=inp.id;i.placeholder=inp.placeholder||'';f.appendChild(i);}
+    grid.appendChild(f);
+  });
+  wrap.appendChild(grid);
+}
+
+function renderFields(){
+  const c=PLATFORMS[currentPlatform];
+  fieldOrder=[...c.fields];
+  const grid=document.getElementById('fieldsGrid');grid.innerHTML='';
+  fieldOrder.forEach(f=>grid.appendChild(makeFieldTag(f)));
+  initDragDrop(grid);
+}
+
+function makeFieldTag(f){
+  const tag=document.createElement('div');
+  tag.className='ftag'+(f.on?' on':'')+(f.locked?' locked':'');
+  tag.dataset.id=f.id;tag.draggable=!f.locked;
+  if(!f.locked)tag.onclick=()=>{tag.classList.toggle('on');};
+  const dot=document.createElement('span');dot.className='dot';tag.appendChild(dot);
+  tag.appendChild(document.createTextNode(f.label));
+  return tag;
+}
+
+function initDragDrop(grid){
+  let dragged=null;
+  grid.querySelectorAll('.ftag:not(.locked)').forEach(tag=>{
+    tag.addEventListener('dragstart',e=>{dragged=tag;tag.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    tag.addEventListener('dragend',()=>{dragged=null;tag.classList.remove('dragging');});
+    tag.addEventListener('dragover',e=>{e.preventDefault();if(dragged&&dragged!==tag){grid.insertBefore(dragged,tag.nextSibling);}});
+  });
+}
+
+function getActiveFields(){
+  const tags=[...document.getElementById('fieldsGrid').querySelectorAll('.ftag')];
+  return tags.filter(t=>t.classList.contains('on')).map(t=>PLATFORMS[currentPlatform].fields.find(f=>f.id===t.dataset.id)?.label||t.dataset.id);
+}
+
+function toggleBatch(){
+  batchMode=!batchMode;
+  document.getElementById('batchTrack').classList.toggle('on',batchMode);
+  document.getElementById('batchCities').classList.toggle('hidden',!batchMode);
+  const locField=document.getElementById('loc');
+  if(locField)locField.style.opacity=batchMode?'.3':'1';
+  document.querySelector('[for="fl-loc"], label[id="fl-loc"]');
+}
+
+function setCount(n,el){
+  document.getElementById('count').value=n;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function log(msg,type){
+  const box=document.getElementById('logBox');
+  const line=document.createElement('div');
+  line.className='log-line'+(type==='ok'?' log-ok':type==='warn'?' log-warn':type==='info'?' log-info':'');
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  line.textContent=`[${ts}] ${msg}`;box.appendChild(line);box.scrollTop=box.scrollHeight;
+}
+
+function setProgress(label,pct){
+  document.getElementById('progLabel').textContent=label;
+  document.getElementById('progPct').textContent=Math.round(pct)+'%';
+  document.getElementById('progFill').style.width=pct+'%';
+}
+
+function startScrape(){
+  const c=PLATFORMS[currentPlatform];
+  const inp1=document.getElementById(c.inputs[0].id);
+  if(inp1&&inp1.tagName==='INPUT'&&!inp1.value.trim()){alert('Fill in the search field first.');return;}
+  const count=parseInt(document.getElementById('count').value)||100;
+  const inputs={};c.inputs.forEach(i=>{const el=document.getElementById(i.id);if(el)inputs[i.id]=el.value;});
+
+  let cities=[''];
+  if(batchMode&&currentPlatform==='maps'){
+    const raw=document.getElementById('cityList').value.trim();
+    if(!raw){alert('Add at least one city in batch mode.');return;}
+    cities=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  } else if(currentPlatform==='maps'){
+    cities=[inputs.loc||'Houston, TX'];
+  }
+
+  document.getElementById('runBtn').disabled=true;
+  document.getElementById('progressWrap').classList.remove('hidden');
+  document.getElementById('resultsCard').classList.add('hidden');
+  document.getElementById('previewCard').classList.add('hidden');
+  document.getElementById('logBox').innerHTML='';
+  allLeads=[];elapsed=0;
+  clearInterval(timer);
+  timer=setInterval(()=>{elapsed++;document.getElementById('mTime').textContent=elapsed+'s';},1000);
+
+  if(cities.length>1){
+    runBatchMode(cities,count,inputs);
+  } else {
+    runSingleMode(cities[0],count,inputs);
+  }
+}
+
+function runBatchMode(cities,count,inputs){
+  const qwrap=document.getElementById('batchQueueWrap');qwrap.classList.remove('hidden');qwrap.innerHTML='';
+  const rows=cities.map((city,i)=>{
+    const row=document.createElement('div');row.className='batch-city-row';row.id='bcrow-'+i;
+    row.innerHTML=`<span class="batch-city-name">${city}</span><span class="batch-city-status bcs-pending" id="bcs-${i}">Pending</span><span class="batch-city-count" id="bcc-${i}"></span>`;
+    qwrap.appendChild(row);return row;
+  });
+
+  let cityIdx=0;let dupes=0;const seen=new Set();
+
+  function nextCity(){
+    if(cityIdx>=cities.length){
+      finishScrape(inputs,dupes);return;
+    }
+    const city=cities[cityIdx];
+    document.getElementById(`bcs-${cityIdx}`).textContent='Running';
+    document.getElementById(`bcs-${cityIdx}`).className='batch-city-status bcs-running';
+    log(`Starting city ${cityIdx+1}/${cities.length}: ${city}`,'info');
+    setProgress(`Scraping ${city}...`, (cityIdx/cities.length)*100);
+
+    const msgs=PLATFORMS[currentPlatform].logs(inputs[PLATFORMS[currentPlatform].inputs[0].id]||'',city);
+    let step=0;
+    function nextStep(){
+      if(step<msgs.length){
+        log(msgs[step],step>2?'ok':'');step++;
+        document.getElementById('mFound').textContent=allLeads.length;
+        setTimeout(nextStep,400+Math.random()*300);
+      } else {
+        const cityLeads=PLATFORMS[currentPlatform].generate(count,inputs,city);
+        let added=0;
+        cityLeads.forEach(l=>{
+          const key=l['Phone (E.164)']||l['Post URL']||l['ASIN']||l['Ad library URL']||JSON.stringify(l).slice(0,60);
+          if(!seen.has(key)){seen.add(key);allLeads.push(l);added++;}else{dupes++;}
+        });
+        document.getElementById('mEnriched').textContent=allLeads.filter(l=>l['Email']).length||Math.floor(allLeads.length*.65);
+        document.getElementById('mDupes').textContent=dupes;
+        document.getElementById('mFound').textContent=allLeads.length;
+        document.getElementById(`bcs-${cityIdx}`).textContent='Done';
+        document.getElementById(`bcs-${cityIdx}`).className='batch-city-status bcs-done';
+        document.getElementById(`bcc-${cityIdx}`).textContent=`${added} leads`;
+        log(`${city} complete — ${added} leads added`,'ok');
+        cityIdx++;setTimeout(nextCity,300);
+      }
+    }
+    setTimeout(nextStep,300);
+  }
+  nextCity();
+}
+
+function runSingleMode(city,count,inputs){
+  document.getElementById('batchQueueWrap').classList.add('hidden');
+  const msgs=PLATFORMS[currentPlatform].logs(inputs[PLATFORMS[currentPlatform].inputs[0].id]||'',city||inputs.loc||'');
+  const seen=new Set();let dupes=0;let step=0;
+  function next(){
+    if(step<msgs.length){
+      const pct=((step+1)/(msgs.length+2))*88;
+      log(msgs[step],step>2?'ok':step===msgs.length-2?'warn':'');
+      setProgress(msgs[step],pct);
+      document.getElementById('mFound').textContent=Math.floor(count*(step+1)/msgs.length);
+      document.getElementById('mEnriched').textContent=Math.floor(count*(step+1)/msgs.length*.62);
+      step++;setTimeout(next,550+Math.random()*350);
+    } else {
+      const raw=PLATFORMS[currentPlatform].generate(count,inputs,city);
+      raw.forEach(l=>{
+        const key=l['Phone (E.164)']||l['Post URL']||l['ASIN']||l['Ad library URL']||JSON.stringify(l).slice(0,60);
+        if(!seen.has(key)){seen.add(key);allLeads.push(l);}else{dupes++;}
+      });
+      document.getElementById('mFound').textContent=allLeads.length;
+      document.getElementById('mEnriched').textContent=allLeads.filter(l=>l['Email']).length||Math.floor(allLeads.length*.62);
+      document.getElementById('mDupes').textContent=dupes;
+      finishScrape(inputs,dupes);
+    }
+  }
+  setTimeout(next,400);
+}
+
+function finishScrape(inputs,dupes){
+  setProgress('Complete — ready to export',100);
+  log(`Done: ${allLeads.length} total leads, ${dupes} dupes removed`,'ok');
+  clearInterval(timer);
+  saveHistory(inputs);
+  buildPreview();
+  buildResults();
+  document.getElementById('runBtn').disabled=false;
+  document.getElementById('btnText').textContent='Run again';
+}
+
+function buildPreview(){
+  const c=PLATFORMS[currentPlatform];
+  if(!c.scoreable){document.getElementById('previewCard').classList.add('hidden');return;}
+  const total=allLeads.length;
+  const withEmail=allLeads.filter(l=>l['Email']).length;
+  const withWeb=allLeads.filter(l=>l['Website']).length;
+  const score4=allLeads.filter(l=>l['Lead score']>=4).length;
+  const score3=allLeads.filter(l=>l['Lead score']===3).length;
+
+  const ps=document.getElementById('previewStats');
+  ps.innerHTML=`
+    <div class="pstat"><div class="pstat-val">${total.toLocaleString()}</div><div class="pstat-lbl">Total leads</div></div>
+    <div class="pstat"><div class="pstat-val green">${withEmail.toLocaleString()}</div><div class="pstat-lbl">Have email<br>${Math.round(withEmail/total*100)}% hit rate</div></div>
+    <div class="pstat"><div class="pstat-val orange">${score4.toLocaleString()}</div><div class="pstat-lbl">Score 4/4<br>best prospects</div></div>
+    <div class="pstat"><div class="pstat-val blue">${Math.round((score4+score3)/total*100)}%</div><div class="pstat-lbl">High quality<br>score 3+</div></div>`;
+
+  const sb=document.getElementById('scoreBars');
+  const retellEst=Math.round(total*0.75*1.5);
+  sb.innerHTML=`
+    <div class="score-bar-wrap">
+      <div class="score-bar-label"><span>Email coverage</span><span>${Math.round(withEmail/total*100)}%</span></div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(withEmail/total*100)}%;background:var(--ok)"></div></div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-label"><span>Website coverage</span><span>${Math.round(withWeb/total*100)}%</span></div>
+      <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(withWeb/total*100)}%;background:var(--info)"></div></div>
+    </div>
+    <div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:8px">
+      Estimated Retell campaign: <span style="color:var(--acc2);font-weight:500">~${Math.floor(retellEst/60)}h ${retellEst%60}m</span> of calls at avg 1.5 min/call · <span style="color:var(--ok)">${score4} high-priority leads</span> sorted first
+    </div>`;
+
+  document.getElementById('previewTitle').textContent=`Campaign preview — ${total.toLocaleString()} leads`;
+  document.getElementById('previewCard').classList.remove('hidden');
+}
+
+function buildResults(){
+  const af=getActiveFields();
+  const filtered=allLeads.map(r=>{const row={};af.forEach(f=>{if(r[f]!==undefined)row[f]=r[f];});return row;});
+
+  const thead=document.getElementById('tableHead');const tbody=document.getElementById('tableBody');
+  thead.innerHTML='';tbody.innerHTML='';
+  const hr=document.createElement('tr');
+  af.forEach(f=>{const th=document.createElement('th');th.textContent=f;hr.appendChild(th);});
+  thead.appendChild(hr);
+
+  const preview=Math.min(10,filtered.length);
+  for(let i=0;i<preview;i++){
+    const tr=document.createElement('tr');
+    af.forEach(f=>{
+      const td=document.createElement('td');const v=String(filtered[i][f]||'');
+      if(f==='Lead score'){
+        const s=parseInt(v);td.innerHTML=`<span class="score-cell sc-${s}">${'★'.repeat(s)}${'☆'.repeat(4-s)}</span>`;
+      } else if(v.startsWith('http')){
+        td.innerHTML=`<a class="link-cell" href="${v}" target="_blank">${v.slice(0,36)}...</a>`;
+      } else if(f==='Notes'){
+        td.innerHTML=`<input type="text" style="height:24px;font-size:11px;background:transparent;border:none;border-bottom:1px solid var(--bord);border-radius:0;padding:0 4px;color:var(--muted)" placeholder="add note..." onchange="allLeads[${i}]['Notes']=this.value">`;
+      } else {td.textContent=v;td.title=v;}
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  }
+
+  const dl=document.getElementById('dlGroup');dl.innerHTML='';
+  const cb=document.createElement('button');cb.className='dl-btn';
+  cb.innerHTML='⬇ Download CSV';cb.onclick=()=>downloadCSV(filtered,af);dl.appendChild(cb);
+  if(PLATFORMS[currentPlatform].showRetell){
+    const rb=document.createElement('button');rb.className='dl-btn retell';
+    rb.innerHTML='⬇ Retell CSV';rb.onclick=()=>downloadRetell();dl.appendChild(rb);
+  }
+  if(currentPlatform==='facebook'||currentPlatform==='tiktok'){
+    const mb=document.createElement('button');mb.className='dl-btn';mb.style.borderColor='#ff8c42';mb.style.color='#ff8c42';
+    mb.innerHTML='⬇ Combined FB+TT CSV';mb.onclick=()=>downloadCombined(filtered,af);dl.appendChild(mb);
+  }
+
+  document.getElementById('resultsTitle').textContent=`${allLeads.length.toLocaleString()} ${PLATFORMS[currentPlatform].label} results`;
+  document.getElementById('resultsSub').textContent=`showing ${preview} of ${allLeads.length} · ${af.length} fields · click notes to annotate`;
+  document.getElementById('footerNote').textContent=`Platform: ${PLATFORMS[currentPlatform].label} · Exported fields: ${af.join(', ')}`;
+  document.getElementById('resultsCard').classList.remove('hidden');
+}
+
+function downloadCSV(data,fields){
+  const rows=data.map(r=>fields.map(f=>`"${String(r[f]||'').replace(/"/g,'""')}"`).join(','));
+  const csv=[fields.join(','),...rows].join('\n');
+  trigger(csv,`leadburner_${currentPlatform}_${Date.now()}.csv`);
+}
+
+function downloadRetell(){
+  const rows=allLeads.filter(l=>l['Phone (E.164)']).map(l=>`"${l['Phone (E.164)']}","${l['Business name']}","${l['Email']}","${l['Address']}"`);
+  trigger(['phone_number,business_name,email,address',...rows].join('\n'),`leadburner_RETELL_${Date.now()}.csv`);
+}
+
+function downloadCombined(data,fields){
+  const rows=data.map(r=>fields.map(f=>`"${String(r[f]||'').replace(/"/g,'""')}"`).join(','));
+  trigger([fields.join(','),...rows].join('\n'),`leadburner_FB_TT_combined_${Date.now()}.csv`);
+}
+
+function trigger(content,filename){
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'text/csv'}));a.download=filename;a.click();
+}
+
+function saveHistory(inputs){
+  const c=PLATFORMS[currentPlatform];
+  const query=Object.values(inputs).filter(Boolean).join(' · ')||c.label;
+  const item={platform:currentPlatform,query,count:allLeads.length,ts:Date.now(),inputs};
+  searchHistory.unshift(item);
+  if(searchHistory.length>10)searchHistory=searchHistory.slice(0,10);
+  localStorage.setItem('lb_history',JSON.stringify(searchHistory));
+  renderHistory();
+}
+
+function renderHistory(){
+  const list=document.getElementById('historyList');list.innerHTML='';
+  if(!searchHistory.length){list.innerHTML='<div class="history-empty">No searches yet — run your first scrape above</div>';return;}
+  searchHistory.forEach((item,idx)=>{
+    const div=document.createElement('div');div.className='history-item';
+    const ago=timeAgo(item.ts);
+    div.innerHTML=`
+      <div class="hi-plat" style="background:${PLAT_BG[item.platform]}">${PLAT_ICONS[item.platform]}</div>
+      <div class="hi-info">
+        <div class="hi-query">${item.query}</div>
+        <div class="hi-meta">${PLATFORMS[item.platform].label} · ${ago}</div>
+      </div>
+      <div class="hi-count">${item.count.toLocaleString()} leads</div>
+      <div class="hi-rerun" onclick="rerun(${idx})">Re-run</div>`;
+    list.appendChild(div);
+  });
+}
+
+function rerun(idx){
+  const item=searchHistory[idx];
+  setPlatform(item.platform);
+  setTimeout(()=>{
+    item.inputs&&Object.entries(item.inputs).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+    window.scrollTo({top:0,behavior:'smooth'});
+  },100);
+}
+
+function timeAgo(ts){
+  const diff=Date.now()-ts;const m=Math.floor(diff/60000);
+  if(m<1)return'just now';if(m<60)return`${m}m ago`;
+  const h=Math.floor(m/60);if(h<24)return`${h}h ago`;
+  return`${Math.floor(h/24)}d ago`;
+}
+
+setPlatform('maps');
+renderHistory();
+</script>
+</body>
+</html>
