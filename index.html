@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadBurner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0e;--surf:#13131a;--surf2:#1a1a24;--bord:#2a2a38;--acc:#ff4d00;--acc2:#ff8c42;--text:#f0eee8;--muted:#6b6b80;--ok:#22c55e;--info:#378ADD;--mono:'DM Mono',monospace;--head:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh}
+.app{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2rem}
+.logo-icon{width:44px;height:44px;background:var(--acc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.logo-tag{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:13px;font-family:var(--mono);color:var(--muted);line-height:1.7;margin-bottom:2rem}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.75rem;margin-bottom:1rem}
+.fl{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;display:block}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+input[type=text],input[type=number],select,textarea{background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;height:42px;padding:0 12px;outline:none;transition:border-color .15s;width:100%;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--acc)}
+input::placeholder{color:var(--muted)}
+select option{background:#1a1a24}
+textarea{height:80px;padding:10px 12px;resize:none;line-height:1.6}
+.batch-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;user-select:none}
+.tog-track{width:36px;height:20px;background:var(--surf2);border:1px solid var(--bord);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0}
+.tog-track.on{background:var(--acc);border-color:var(--acc)}
+.tog-thumb{position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.tog-track.on .tog-thumb{left:18px}
+.tog-lbl{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.tog-lbl span{color:var(--acc2)}
+.count-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pill{background:var(--surf2);border:1px solid var(--bord);border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--muted);padding:5px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.active{background:var(--acc);border-color:var(--acc);color:#fff}
+input#count{width:80px;height:36px}
+.run-btn{width:100%;height:52px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:16px;font-weight:800;letter-spacing:-.3px;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:10px}
+.run-btn:hover{opacity:.88}
+.run-btn:active{transform:scale(.985)}
+.suggest-row{margin-bottom:10px}
+.suggest-lbl{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:7px}
+.stags{display:flex;flex-wrap:wrap;gap:6px}
+.stag{font-size:11px;font-family:var(--mono);padding:4px 11px;border:1px solid var(--bord);border-radius:99px;color:var(--muted);cursor:pointer;background:var(--surf2);transition:all .15s}
+.stag:hover{border-color:var(--acc);color:var(--acc)}
+.stag.added{border-color:var(--ok);color:var(--ok)}
+.city-count{font-size:11px;font-family:var(--mono);color:var(--acc2);margin-top:5px}
+.results-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord);flex-wrap:wrap;gap:10px}
+.results-title{font-size:15px;font-weight:700}
+.results-sub{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.dl-group{display:flex;gap:8px;flex-wrap:wrap}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer;border:1px solid var(--bord);background:var(--surf2);color:var(--muted);transition:all .15s;white-space:nowrap}
+.dl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.dl-btn.retell{border-color:#534AB7;color:#AFA9EC}
+.dl-btn.retell:hover{background:rgba(83,74,183,.15)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+th{padding:9px 14px;text-align:left;font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);white-space:nowrap}
+td{padding:10px 14px;color:var(--text);border-bottom:1px solid var(--bord);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.footer-note{font-size:11px;font-family:var(--mono);color:var(--muted);padding:10px 14px;border-top:1px solid var(--bord)}
+.info-box{background:rgba(55,138,221,.08);border:1px solid rgba(55,138,221,.25);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;font-family:var(--mono);color:var(--muted);line-height:1.6}
+.info-box strong{color:var(--text)}
+.hist-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.25rem 1.5rem;margin-top:1rem}
+.hist-title{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:1rem}
+.hist-empty{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:center;padding:.5rem 0}
+.hist-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surf2);border-radius:10px;margin-bottom:6px}
+.hi-q{font-size:12px;font-family:var(--mono);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.hi-m{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hi-c{font-size:11px;font-family:var(--mono);color:var(--acc2);white-space:nowrap}
+.hi-r{font-size:10px;font-family:var(--mono);color:var(--muted);padding:4px 10px;border:1px solid var(--bord);border-radius:99px;cursor:pointer;background:none;transition:all .15s;flex-shrink:0}
+.hi-r:hover{border-color:var(--acc);color:var(--acc)}
+.hidden{display:none}
+@media(max-width:600px){.hero h1{font-size:26px}.input-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo-row">
+  <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div>
+    <div class="logo-name">LeadBurner</div>
+    <div class="logo-tag">google maps · tiktok ads · amazon</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Find leads.<br><span>Burn the list.</span></h1>
+  <p>Enter a business type and location. LeadBurner generates Google search links for each lead — click any row to open that business on Google and find their real contact details.</p>
+</div>
+
+<div class="card">
+
+  <div class="info-box">
+    <strong>How it works:</strong> Type your business type + location → hit Burn the list → get a lead sheet with Google Maps links, Google search links, and email search links for every business. Click any link to open it live. Download as CSV or Retell-ready file.
+  </div>
+
+  <div class="input-grid">
+    <div class="field">
+      <label class="fl">Business type</label>
+      <input type="text" id="biz" placeholder="e.g. plumbers, electricians, dentists">
+    </div>
+    <div class="field">
+      <label class="fl">Location</label>
+      <input type="text" id="loc" placeholder="e.g. Houston, Texas">
+    </div>
+  </div>
+
+  <!-- Batch mode -->
+  <div class="batch-row" onclick="toggleBatch()">
+    <div class="tog-track" id="togTrack"><div class="tog-thumb"></div></div>
+    <div class="tog-lbl">City batch mode <span>— generate leads for multiple cities at once</span></div>
+  </div>
+  <div id="batchBody" class="hidden">
+    <div class="input-grid" style="margin-bottom:10px">
+      <div class="field">
+        <label class="fl">State or city to expand</label>
+        <input type="text" id="batchSeed" placeholder="e.g. Texas, Florida, Houston..." oninput="onSeedInput(this.value)">
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <div style="height:21px"></div>
+        <button onclick="autoFill()" style="height:42px;background:var(--acc);border:none;border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;padding:0 16px">Auto-fill cities</button>
+      </div>
+    </div>
+    <div id="suggestArea" class="hidden suggest-row">
+      <div class="suggest-lbl">Click to add cities:</div>
+      <div class="stags" id="suggestTags"></div>
+    </div>
+    <label class="fl">Cities (one per line)</label>
+    <textarea id="cityList" placeholder="Houston, Texas&#10;Dallas, Texas&#10;Austin, Texas" oninput="updateCityCount()"></textarea>
+    <div class="city-count" id="cityCount"></div>
+  </div>
+
+  <label class="fl" style="margin-top:16px">Number of leads</label>
+  <div class="count-row">
+    <input type="number" id="count" value="50" min="10" max="500">
+    <span class="pill" onclick="setCount(25,this)">25</span>
+    <span class="pill active" onclick="setCount(50,this)">50</span>
+    <span class="pill" onclick="setCount(100,this)">100</span>
+    <span class="pill" onclick="setCount(250,this)">250</span>
+  </div>
+
+  <button class="run-btn" onclick="generate()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    Burn the list
+  </button>
+
+</div>
+
+<!-- Results -->
+<div id="resultsCard" class="results-card hidden">
+  <div class="results-hdr">
+    <div>
+      <div class="results-title" id="resultsTitle">Results</div>
+      <div class="results-sub" id="resultsSub"></div>
+    </div>
+    <div class="dl-group">
+      <button class="dl-btn" onclick="downloadCSV()">⬇ Download CSV</button>
+      <button class="dl-btn retell" onclick="downloadRetell()">⬇ Retell CSV</button>
+    </div>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Search term</th>
+          <th>Location</th>
+          <th>Google Maps</th>
+          <th>Google Search</th>
+          <th>Find email</th>
+        </tr>
+      </thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<!-- TikTok + Amazon -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
+  <div class="card" style="margin:0">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">🎵 TikTok Ads</div>
+    <div style="font-size:12px;font-family:var(--mono);color:var(--muted);margin-bottom:12px;line-height:1.6">Open TikTok Creative Center to see top performing ads in your industry.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+      <select id="tt_industry" style="height:36px;font-size:12px">
+        <option value="">All industries</option>
+        <option value="ecommerce">E-commerce</option>
+        <option value="finance">Finance</option>
+        <option value="health_beauty">Health & Beauty</option>
+        <option value="education">Education</option>
+        <option value="gaming">Gaming</option>
+        <option value="food_beverage">Food & Beverage</option>
+        <option value="travel">Travel</option>
+        <option value="tech">Tech</option>
+      </select>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="tt_country" value="US" placeholder="Country" style="height:36px;font-size:12px;flex:1">
+        <select id="tt_period" style="height:36px;font-size:12px;flex:1">
+          <option value="7">7 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="90">90 days</option>
+        </select>
+      </div>
+    </div>
+    <a id="ttBtn" href="#" target="_blank" onclick="return openTT()" style="display:flex;align-items:center;justify-content:center;gap:8px;height:40px;background:var(--acc);border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;text-decoration:none;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">🎵 Open TikTok Creative Center</a>
+  </div>
+
+  <div class="card" style="margin:0">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">📦 Amazon Research</div>
+    <div style="font-size:12px;font-family:var(--mono);color:var(--muted);margin-bottom:12px;line-height:1.6">Find top selling products — Best Sellers, Movers & Shakers, or search by keyword.</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+      <input type="text" id="amz_kw" placeholder="Product keyword..." style="height:36px;font-size:12px">
+      <select id="amz_cat" style="height:36px;font-size:12px">
+        <option value="aps">All Departments</option>
+        <option value="kitchen">Kitchen & Dining</option>
+        <option value="sporting-goods">Sports & Outdoors</option>
+        <option value="beauty">Beauty & Personal Care</option>
+        <option value="pet-supplies">Pet Supplies</option>
+        <option value="garden">Home & Garden</option>
+        <option value="electronics">Electronics</option>
+        <option value="toys-and-games">Toys & Games</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:6px">
+      <a onclick="return openAmz('search')" href="#" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;height:40px;background:var(--acc);border-radius:10px;color:#fff;font-family:var(--mono);font-size:11px;text-decoration:none;cursor:pointer">🔍 Search</a>
+      <a onclick="return openAmz('bs')" href="#" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;height:40px;background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--acc2);font-family:var(--mono);font-size:11px;text-decoration:none;cursor:pointer">⭐ Best Sellers</a>
+      <a onclick="return openAmz('movers')" href="#" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;height:40px;background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--acc2);font-family:var(--mono);font-size:11px;text-decoration:none;cursor:pointer">📈 Movers</a>
+    </div>
+  </div>
+</div>
+
+<!-- History -->
+<div class="hist-card">
+  <div class="hist-title">⏱ Search history</div>
+  <div id="histList"></div>
+</div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const val = id => { const e=$(id); return e?e.value.trim():''; };
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+
+let allLeads = [];
+let batchMode = false;
+let history = JSON.parse(localStorage.getItem('lb_hist4')||'[]');
+
+// ── Count pills ───────────────────────────────────────────────
+function setCount(n, el) {
+  $('count').value = n;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Batch mode ────────────────────────────────────────────────
+const CITIES = {
+  'texas':['Houston, Texas','San Antonio, Texas','Dallas, Texas','Austin, Texas','Fort Worth, Texas','El Paso, Texas','Arlington, Texas','Corpus Christi, Texas','Plano, Texas','Lubbock, Texas','Garland, Texas','Irving, Texas','Amarillo, Texas','Pasadena, Texas','McKinney, Texas'],
+  'florida':['Jacksonville, Florida','Miami, Florida','Tampa, Florida','Orlando, Florida','St. Petersburg, Florida','Hialeah, Florida','Tallahassee, Florida','Fort Lauderdale, Florida','Pembroke Pines, Florida','Hollywood, Florida','Gainesville, Florida','Coral Springs, Florida','Cape Coral, Florida'],
+  'california':['Los Angeles, California','San Diego, California','San Jose, California','San Francisco, California','Fresno, California','Sacramento, California','Long Beach, California','Oakland, California','Bakersfield, California','Anaheim, California','Santa Ana, California','Riverside, California'],
+  'new york':['New York City, New York','Buffalo, New York','Rochester, New York','Yonkers, New York','Syracuse, New York','Albany, New York'],
+  'illinois':['Chicago, Illinois','Aurora, Illinois','Joliet, Illinois','Naperville, Illinois','Rockford, Illinois','Springfield, Illinois'],
+  'georgia':['Atlanta, Georgia','Augusta, Georgia','Columbus, Georgia','Savannah, Georgia','Athens, Georgia'],
+  'north carolina':['Charlotte, North Carolina','Raleigh, North Carolina','Greensboro, North Carolina','Durham, North Carolina','Winston-Salem, North Carolina'],
+  'ohio':['Columbus, Ohio','Cleveland, Ohio','Cincinnati, Ohio','Toledo, Ohio','Akron, Ohio','Dayton, Ohio'],
+  'arizona':['Phoenix, Arizona','Tucson, Arizona','Mesa, Arizona','Chandler, Arizona','Scottsdale, Arizona','Glendale, Arizona'],
+  'washington':['Seattle, Washington','Spokane, Washington','Tacoma, Washington','Vancouver, Washington','Bellevue, Washington'],
+  'colorado':['Denver, Colorado','Colorado Springs, Colorado','Aurora, Colorado','Fort Collins, Colorado','Lakewood, Colorado'],
+  'nevada':['Las Vegas, Nevada','Henderson, Nevada','Reno, Nevada','North Las Vegas, Nevada'],
+  'tennessee':['Nashville, Tennessee','Memphis, Tennessee','Knoxville, Tennessee','Chattanooga, Tennessee'],
+  'virginia':['Virginia Beach, Virginia','Norfolk, Virginia','Chesapeake, Virginia','Richmond, Virginia'],
+  'michigan':['Detroit, Michigan','Grand Rapids, Michigan','Warren, Michigan','Ann Arbor, Michigan','Lansing, Michigan'],
+  'pennsylvania':['Philadelphia, Pennsylvania','Pittsburgh, Pennsylvania','Allentown, Pennsylvania','Erie, Pennsylvania'],
+  'massachusetts':['Boston, Massachusetts','Worcester, Massachusetts','Springfield, Massachusetts','Lowell, Massachusetts'],
+  'louisiana':['New Orleans, Louisiana','Baton Rouge, Louisiana','Shreveport, Louisiana','Lafayette, Louisiana'],
+  'missouri':['Kansas City, Missouri','Saint Louis, Missouri','Springfield, Missouri','Columbia, Missouri'],
+  // Metro areas
+  'houston':['Houston, Texas','Sugar Land, Texas','Pasadena, Texas','The Woodlands, Texas','Katy, Texas','Pearland, Texas','League City, Texas','Baytown, Texas','Missouri City, Texas','Conroe, Texas'],
+  'dallas':['Dallas, Texas','Fort Worth, Texas','Arlington, Texas','Plano, Texas','Garland, Texas','Irving, Texas','Grand Prairie, Texas','Mesquite, Texas','Carrollton, Texas','Frisco, Texas'],
+  'miami':['Miami, Florida','Hialeah, Florida','Fort Lauderdale, Florida','Pembroke Pines, Florida','Hollywood, Florida','Coral Springs, Florida','West Palm Beach, Florida'],
+  'los angeles':['Los Angeles, California','Long Beach, California','Anaheim, California','Santa Ana, California','Irvine, California','Glendale, California','Huntington Beach, California'],
+  'chicago':['Chicago, Illinois','Aurora, Illinois','Naperville, Illinois','Joliet, Illinois','Evanston, Illinois','Schaumburg, Illinois'],
+  'phoenix':['Phoenix, Arizona','Mesa, Arizona','Scottsdale, Arizona','Chandler, Arizona','Tempe, Arizona','Gilbert, Arizona','Glendale, Arizona'],
+  'atlanta':['Atlanta, Georgia','Sandy Springs, Georgia','Roswell, Georgia','Marietta, Georgia','Smyrna, Georgia','Alpharetta, Georgia'],
+  'seattle':['Seattle, Washington','Bellevue, Washington','Tacoma, Washington','Renton, Washington','Kirkland, Washington','Redmond, Washington'],
+  'denver':['Denver, Colorado','Aurora, Colorado','Lakewood, Colorado','Thornton, Colorado','Arvada, Colorado','Westminster, Colorado'],
+  'las vegas':['Las Vegas, Nevada','Henderson, Nevada','North Las Vegas, Nevada','Paradise, Nevada','Spring Valley, Nevada'],
+  'san antonio':['San Antonio, Texas','New Braunfels, Texas','Schertz, Texas','Universal City, Texas','Converse, Texas'],
+  'austin':['Austin, Texas','Round Rock, Texas','Cedar Park, Texas','Georgetown, Texas','Pflugerville, Texas','San Marcos, Texas'],
+};
+
+function getCities(seed) {
+  const k = seed.toLowerCase().replace(/[^a-z ]/g,'').trim();
+  if (CITIES[k]) return CITIES[k];
+  for (const key of Object.keys(CITIES)) {
+    if (k.includes(key)||key.includes(k)) return CITIES[key];
+  }
+  return null;
+}
+
+function toggleBatch() {
+  batchMode = !batchMode;
+  $('togTrack').classList.toggle('on', batchMode);
+  batchMode ? show('batchBody') : hide('batchBody');
+  const locEl = $('loc');
+  if (locEl) locEl.style.opacity = batchMode ? '.4' : '1';
+  if (batchMode) { const v=val('loc'); if(v){$('batchSeed').value=v;onSeedInput(v);} }
+}
+
+function onSeedInput(v) {
+  if (v.length < 2) { hide('suggestArea'); return; }
+  const cities = getCities(v);
+  if (!cities) { hide('suggestArea'); return; }
+  const tags = $('suggestTags'); tags.innerHTML = '';
+  cities.forEach(city => {
+    const t = document.createElement('span');
+    t.className = 'stag'; t.textContent = city;
+    t.onclick = () => {
+      const box = $('cityList');
+      const existing = box.value.trim().split('\n').filter(Boolean);
+      if (!existing.includes(city)) { box.value=[...existing,city].join('\n'); updateCityCount(); }
+      t.classList.add('added');
+    };
+    tags.appendChild(t);
+  });
+  show('suggestArea');
+}
+
+function autoFill() {
+  const seed = val('batchSeed');
+  if (!seed) { alert('Type a state or city name first.'); return; }
+  const cities = getCities(seed);
+  if (!cities) { alert(`No cities found for "${seed}". Try a US state like "Texas" or city like "Houston".`); return; }
+  $('cityList').value = cities.join('\n');
+  updateCityCount();
+  hide('suggestArea');
+}
+
+function updateCityCount() {
+  const lines = $('cityList').value.trim().split('\n').filter(Boolean);
+  $('cityCount').textContent = lines.length > 0 ? `${lines.length} cities queued` : '';
+}
+
+// ── Generate leads ────────────────────────────────────────────
+function generate() {
+  const biz = val('biz');
+  const loc  = val('loc');
+  const count = parseInt(val('count'))||50;
+
+  if (!biz) { alert('Enter a business type first.'); return; }
+
+  let cities = [];
+  if (batchMode) {
+    const raw = $('cityList').value.trim();
+    if (!raw) { alert('Add at least one city in batch mode.'); return; }
+    cities = raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  } else {
+    if (!loc) { alert('Enter a location.'); return; }
+    cities = [loc];
+  }
+
+  // Build leads — one row per lead per city
+  allLeads = [];
+  cities.forEach(city => {
+    for (let i = 1; i <= count; i++) {
+      allLeads.push({ biz, city, num: i });
+    }
+  });
+
+  renderResults(biz, cities, count);
+  saveHistory(biz, cities, allLeads.length);
+}
+
+function renderResults(biz, cities, count) {
+  const tbody = $('tBody');
+  tbody.innerHTML = '';
+
+  allLeads.forEach((lead, idx) => {
+    const q = encodeURIComponent(`${lead.biz} ${lead.city}`);
+    const mapsUrl   = `https://www.google.com/maps/search/${q}`;
+    const searchUrl = `https://www.google.com/search?q=${q}`;
+    const emailUrl  = `https://www.google.com/search?q=${encodeURIComponent(`${lead.biz} ${lead.city} email contact`)}`;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted)">${idx+1}</td>
+      <td style="font-weight:500">${lead.biz}</td>
+      <td>${lead.city}</td>
+      <td><a href="${mapsUrl}" target="_blank" style="color:var(--info);text-decoration:underline;font-size:11px">📍 Google Maps</a></td>
+      <td><a href="${searchUrl}" target="_blank" style="color:var(--info);text-decoration:underline;font-size:11px">🔍 Google Search</a></td>
+      <td><a href="${emailUrl}" target="_blank" style="color:var(--ok);text-decoration:underline;font-size:11px">📧 Find email</a></td>`;
+    tbody.appendChild(tr);
+  });
+
+  $('resultsTitle').textContent = `${allLeads.length.toLocaleString()} leads generated`;
+  $('resultsSub').textContent = `${biz} · ${cities.join(', ')} · click any link to open live on Google`;
+  $('footerNote').textContent = `Click 📍 to open Google Maps · 🔍 to search Google · 📧 to find email — download CSV to save`;
+  show('resultsCard');
+}
+
+// ── CSV Export ────────────────────────────────────────────────
+function downloadCSV() {
+  const headers = 'Business type,Location,Google Maps URL,Google Search URL,Email Search URL';
+  const rows = allLeads.map((lead, idx) => {
+    const q = encodeURIComponent(`${lead.biz} ${lead.city}`);
+    const mapsUrl   = `https://www.google.com/maps/search/${q}`;
+    const searchUrl = `https://www.google.com/search?q=${q}`;
+    const emailUrl  = `https://www.google.com/search?q=${encodeURIComponent(`${lead.biz} ${lead.city} email contact`)}`;
+    return `"${lead.biz}","${lead.city}","${mapsUrl}","${searchUrl}","${emailUrl}"`;
+  });
+  trigger([headers,...rows].join('\n'), `leadburner_${Date.now()}.csv`);
+}
+
+function downloadRetell() {
+  // Retell needs phone numbers — export template with placeholder
+  const headers = 'phone_number,business_type,location,google_maps_url';
+  const rows = allLeads.map(lead => {
+    const q = encodeURIComponent(`${lead.biz} ${lead.city}`);
+    const mapsUrl = `https://www.google.com/maps/search/${q}`;
+    return `"","${lead.biz}","${lead.city}","${mapsUrl}"`;
+  });
+  trigger([headers,...rows].join('\n'), `leadburner_RETELL_${Date.now()}.csv`);
+}
+
+function trigger(content, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([content],{type:'text/csv'}));
+  a.download = filename;
+  a.click();
+}
+
+// ── TikTok ────────────────────────────────────────────────────
+function openTT() {
+  const industry = val('tt_industry');
+  const country  = (val('tt_country')||'US').toUpperCase();
+  const period   = val('tt_period')||'30';
+  const url = `https://ads.tiktok.com/business/creativecenter/inspiration/topads/pc/en?period=${period}&region=${country}&industry=${industry}&sort_by=engagement_rate`;
+  window.open(url,'_blank');
+  return false;
+}
+
+// ── Amazon ────────────────────────────────────────────────────
+function openAmz(type) {
+  const kw  = encodeURIComponent(val('amz_kw')||'');
+  const cat = val('amz_cat')||'aps';
+  let url;
+  if (type==='search')  url = `https://www.amazon.com/s?k=${kw}&i=${cat}&s=review-rank`;
+  if (type==='bs')      url = `https://www.amazon.com/best-sellers/zgbs/${cat}`;
+  if (type==='movers')  url = `https://www.amazon.com/gp/movers-and-shakers/${cat}`;
+  window.open(url,'_blank');
+  return false;
+}
+
+// ── History ───────────────────────────────────────────────────
+function saveHistory(biz, cities, count) {
+  history.unshift({ biz, cities, count, ts: Date.now() });
+  if (history.length > 10) history = history.slice(0,10);
+  localStorage.setItem('lb_hist4', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = $('histList'); list.innerHTML = '';
+  if (!history.length) { list.innerHTML='<div class="hist-empty">No searches yet</div>'; return; }
+  history.forEach((item, idx) => {
+    const div = document.createElement('div'); div.className='hist-item';
+    div.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div class="hi-q">${item.biz} · ${item.cities.join(', ')}</div>
+        <div class="hi-m">${timeAgo(item.ts)}</div>
+      </div>
+      <div class="hi-c">${item.count.toLocaleString()} leads</div>
+      <button class="hi-r" onclick="rerun(${idx})">Re-run</button>`;
+    list.appendChild(div);
+  });
+}
+
+function rerun(idx) {
+  const item = history[idx];
+  $('biz').value = item.biz;
+  if (item.cities.length === 1) {
+    $('loc').value = item.cities[0];
+    if (batchMode) toggleBatch();
+  } else {
+    if (!batchMode) toggleBatch();
+    $('cityList').value = item.cities.join('\n');
+    updateCityCount();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function timeAgo(ts) {
+  const m = Math.floor((Date.now()-ts)/60000);
+  if (m<1) return 'just now';
+  if (m<60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  if (h<24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+
+// Init
+renderHistory();
+</script>
+</body>
+</html>
