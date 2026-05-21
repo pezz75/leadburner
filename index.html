@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadBurner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0e;--surf:#13131a;--surf2:#1a1a24;--bord:#2a2a38;--acc:#ff4d00;--acc2:#ff8c42;--text:#f0eee8;--muted:#6b6b80;--ok:#22c55e;--info:#378ADD;--warn:#f59e0b;--mono:'DM Mono',monospace;--head:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh}
+.app{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2rem}
+.logo-icon{width:44px;height:44px;background:var(--acc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.logo-tag{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:13px;font-family:var(--mono);color:var(--muted);line-height:1.7;margin-bottom:2rem}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.75rem;margin-bottom:1rem}
+.api-banner{background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.api-banner.ok{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3)}
+.api-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}
+.api-banner.ok .api-dot{background:var(--ok)}
+.api-text{font-size:12px;font-family:var(--mono);color:var(--muted);flex:1;line-height:1.6}
+.api-text strong{color:var(--text)}
+.api-text a{color:var(--acc)}
+.api-row{display:flex;gap:8px;flex:1;min-width:240px}
+.api-row input{flex:1;height:36px;font-size:12px;padding:0 10px;background:var(--surf2);border:1px solid var(--bord);border-radius:8px;color:var(--text);font-family:var(--mono);outline:none}
+.api-row input:focus{border-color:var(--acc)}
+.api-row input::placeholder{color:var(--muted)}
+.api-save{height:36px;padding:0 14px;background:var(--acc);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;white-space:nowrap}
+.fl{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;display:block}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=number]{background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;height:42px;padding:0 12px;outline:none;transition:border-color .15s;width:100%}
+input:focus{border-color:var(--acc)}
+input::placeholder{color:var(--muted)}
+.count-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pill{background:var(--surf2);border:1px solid var(--bord);border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--muted);padding:5px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.active{background:var(--acc);border-color:var(--acc);color:#fff}
+input#count{width:80px;height:36px}
+.run-btn{width:100%;height:52px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s}
+.run-btn:hover{opacity:.88}
+.run-btn:disabled{opacity:.3;cursor:not-allowed}
+.prog-wrap{margin-top:1.5rem}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:8px}
+.prog-lbl{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.prog-pct{font-size:12px;font-family:var(--mono);color:var(--acc);font-weight:500}
+.prog-track{height:3px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.prog-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .5s}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.metric{background:var(--surf2);border-radius:10px;padding:12px 14px}
+.metric-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.metric-val{font-size:22px;font-weight:800;letter-spacing:-1px}
+.metric-sub{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.log{background:var(--bg);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;font-family:var(--mono);font-size:11px;height:72px;overflow-y:auto;line-height:1.7}
+.log div{color:var(--muted)}
+.log .ok{color:var(--ok)}
+.log .warn{color:var(--warn)}
+.results-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord);flex-wrap:wrap;gap:10px}
+.results-title{font-size:15px;font-weight:700}
+.results-sub{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.dl-group{display:flex;gap:8px}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer;border:1px solid var(--bord);background:var(--surf2);color:var(--muted);transition:all .15s;white-space:nowrap}
+.dl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.dl-btn.retell{border-color:#534AB7;color:#AFA9EC}
+.dl-btn.retell:hover{background:rgba(83,74,183,.15)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+th{padding:9px 14px;text-align:left;font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);white-space:nowrap}
+td{padding:10px 14px;color:var(--text);border-bottom:1px solid var(--bord);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.badge{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.1);color:var(--ok)}
+.footer-note{font-size:11px;font-family:var(--mono);color:var(--muted);padding:10px 14px;border-top:1px solid var(--bord)}
+.hidden{display:none}
+@media(max-width:600px){.hero h1{font-size:26px}.input-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo-row">
+  <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div>
+    <div class="logo-name">LeadBurner</div>
+    <div class="logo-tag">powered by apify · real google maps data</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Real leads.<br><span>Burn the list.</span></h1>
+  <p>Real Google Maps data — business name, phone, email, website, address. One button. Download as CSV or Retell file.</p>
+</div>
+
+<div class="card">
+
+  <div class="api-banner" id="apiBanner">
+    <div class="api-dot"></div>
+    <div class="api-text">
+      <strong>Apify token needed</strong> — free at <a href="https://console.apify.com/account/integrations" target="_blank">console.apify.com</a> → Settings → Integrations → Create token
+    </div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="Paste Apify token..." autocomplete="off">
+      <button class="api-save" onclick="saveKey()">Save</button>
+    </div>
+  </div>
+
+  <div class="input-grid">
+    <div class="field">
+      <label class="fl">Business type</label>
+      <input type="text" id="biz" placeholder="e.g. plumbers, electricians">
+    </div>
+    <div class="field">
+      <label class="fl">Location</label>
+      <input type="text" id="loc" placeholder="e.g. Houston, Texas">
+    </div>
+  </div>
+
+  <label class="fl">Number of leads</label>
+  <div class="count-row">
+    <input type="number" id="count" value="20" min="5" max="100">
+    <span class="pill" onclick="setCount(10,this)">10</span>
+    <span class="pill active" onclick="setCount(20,this)">20</span>
+    <span class="pill" onclick="setCount(30,this)">30</span>
+    <span class="pill" onclick="setCount(50,this)">50</span>
+  </div>
+
+  <button class="run-btn" id="runBtn" onclick="go()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span id="btnLabel">Burn the list</span>
+  </button>
+
+  <div id="progWrap" class="prog-wrap hidden">
+    <div class="prog-hdr">
+      <span class="prog-lbl" id="progLbl">Starting...</span>
+      <span class="prog-pct" id="progPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-lbl">Found</div><div class="metric-val" id="mFound">0</div><div class="metric-sub">businesses</div></div>
+      <div class="metric"><div class="metric-lbl">With email</div><div class="metric-val" id="mEmail">0</div><div class="metric-sub">found</div></div>
+      <div class="metric"><div class="metric-lbl">Time</div><div class="metric-val" id="mTime">0s</div><div class="metric-sub">elapsed</div></div>
+    </div>
+    <div class="log" id="logBox"></div>
+  </div>
+</div>
+
+<div id="resultsCard" class="results-card hidden">
+  <div class="results-hdr">
+    <div>
+      <div class="results-title" id="resultsTitle">Results</div>
+      <div class="results-sub" id="resultsSub"></div>
+    </div>
+    <div class="dl-group">
+      <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+      <button class="dl-btn retell" onclick="downloadRetell()">⬇ Retell CSV</button>
+    </div>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Website</th><th>Address</th><th>Status</th></tr></thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const val=id=>{const e=$(id);return e?e.value.trim():'';};
+const show=id=>$(id).classList.remove('hidden');
+const hide=id=>$(id).classList.add('hidden');
+
+let apiKey=localStorage.getItem('lb_apify')||'';
+let allLeads=[];
+let elapsed=0;
+let timer=null;
+
+function saveKey(){
+  const k=val('apiKeyInput');
+  if(!k){alert('Paste your Apify token first.');return;}
+  apiKey=k;
+  localStorage.setItem('lb_apify',k);
+  updateBanner();
+}
+
+function updateBanner(){
+  const b=$('apiBanner');
+  if(apiKey){
+    b.className='api-banner ok';
+    b.innerHTML=`<div class="api-dot"></div><div class="api-text"><strong>Connected to Apify</strong> — real Google Maps scraping enabled</div><button onclick="clearKey()" style="height:32px;padding:0 12px;background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer">Change</button>`;
+  } else {
+    b.className='api-banner';
+    b.innerHTML=`<div class="api-dot"></div><div class="api-text"><strong>Apify token needed</strong> — free at <a href="https://console.apify.com/account/integrations" target="_blank">console.apify.com</a> → Settings → Integrations → Create token</div><div class="api-row"><input type="password" id="apiKeyInput" placeholder="Paste Apify token..." autocomplete="off"><button class="api-save" onclick="saveKey()">Save</button></div>`;
+  }
+}
+
+function clearKey(){apiKey='';localStorage.removeItem('lb_apify');updateBanner();}
+
+function setCount(n,el){
+  $('count').value=n;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function log(msg,type){
+  const box=$('logBox');
+  const d=document.createElement('div');
+  d.className=type||'';
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.textContent=`[${ts}] ${msg}`;
+  box.appendChild(d);
+  box.scrollTop=box.scrollHeight;
+}
+
+function setProgress(lbl,pct){
+  $('progLbl').textContent=lbl;
+  $('progPct').textContent=Math.round(pct)+'%';
+  $('progFill').style.width=pct+'%';
+}
+
+async function go(){
+  if(!apiKey){alert('Add your Apify token first.');return;}
+  const biz=val('biz');
+  const loc=val('loc');
+  const count=parseInt(val('count'))||20;
+  if(!biz){alert('Enter a business type.');return;}
+  if(!loc){alert('Enter a location.');return;}
+
+  $('runBtn').disabled=true;
+  $('btnLabel').textContent='Running...';
+  show('progWrap');
+  hide('resultsCard');
+  $('logBox').innerHTML='';
+  allLeads=[];
+  elapsed=0;
+  clearInterval(timer);
+  timer=setInterval(()=>{elapsed++;$('mTime').textContent=elapsed+'s';},1000);
+
+  try {
+    // Step 1: Start Apify run
+    log(`Searching for "${biz}" in ${loc}...`);
+    setProgress('Starting Apify...',5);
+
+    const startRes = await fetch(
+      `https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=${apiKey}`,
+      {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          searchStringsArray:[`${biz} in ${loc}`],
+          maxCrawledPlacesPerSearch:count,
+          language:'en',
+          maxImages:0,
+          maxReviews:0,
+          scrapeContacts:true
+        })
+      }
+    );
+
+    if(!startRes.ok){
+      const e=await startRes.json().catch(()=>({}));
+      throw new Error(e.error?.message||`Apify error ${startRes.status}`);
+    }
+
+    const startData=await startRes.json();
+    const runId=startData.data?.id;
+    if(!runId) throw new Error('No run ID from Apify');
+    log(`Run started (${runId})`, 'ok');
+    setProgress('Scraping Google Maps...',15);
+
+    // Step 2: Poll for completion
+    let done=false;
+    let polls=0;
+    while(!done && polls<60){
+      await sleep(5000);
+      polls++;
+      const statusRes=await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`);
+      const statusData=await statusRes.json();
+      const status=statusData.data?.status;
+      const pct=15+Math.min(polls*1.2,70);
+      setProgress(`Google Maps scraping... (${polls*5}s)`,pct);
+      log(`Status: ${status}`);
+      if(status==='SUCCEEDED'){done=true;break;}
+      if(['FAILED','ABORTED','TIMED-OUT'].includes(status)) throw new Error(`Run ${status}`);
+    }
+    if(!done) throw new Error('Timed out waiting for Apify');
+
+    // Step 3: Get results
+    log('Fetching results...','ok');
+    setProgress('Getting results...',90);
+    const runRes=await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`);
+    const runData=await runRes.json();
+    const dsId=runData.data?.defaultDatasetId;
+    const itemsRes=await fetch(`https://api.apify.com/v2/datasets/${dsId}/items?token=${apiKey}&format=json&limit=${count}`);
+    const items=await itemsRes.json();
+    const raw=Array.isArray(items)?items:(items.items||[]);
+
+    allLeads=raw.map(r=>({
+      name:    r.title||r.name||'',
+      phone:   fmtPhone(r.phone||r.phoneUnformatted||''),
+      email:   getEmail(r),
+      website: cleanUrl(r.website||r.url||''),
+      address: r.address||r.street||'',
+      status:  'CALL'
+    })).filter(r=>r.name);
+
+    clearInterval(timer);
+    setProgress('Done!',100);
+    log(`${allLeads.length} leads found — ${allLeads.filter(l=>l.email).length} with email`,'ok');
+    $('mFound').textContent=allLeads.length;
+    $('mEmail').textContent=allLeads.filter(l=>l.email).length;
+    buildResults(biz,loc);
+
+  } catch(err){
+    clearInterval(timer);
+    setProgress('Error',0);
+    log('Error: '+err.message,'warn');
+    alert('Error: '+err.message);
+  }
+
+  $('runBtn').disabled=false;
+  $('btnLabel').textContent='Run again';
+}
+
+function fmtPhone(r){
+  if(!r)return'';
+  const d=r.replace(/\D/g,'');
+  if(d.length===10)return`+1${d}`;
+  if(d.length===11&&d[0]==='1')return`+${d}`;
+  if(d.length>10)return`+${d}`;
+  return r;
+}
+
+function getEmail(r){
+  if(r.emails&&Array.isArray(r.emails)&&r.emails.length){
+    const e=r.emails[0];
+    const v=typeof e==='string'?e:(e.email||e.value||'');
+    return isEmail(v)?v:'';
+  }
+  if(r.email&&isEmail(r.email))return r.email;
+  if(r.contacts&&Array.isArray(r.contacts)){
+    const ec=r.contacts.find(c=>c.type==='email');
+    if(ec&&isEmail(ec.value))return ec.value;
+  }
+  return'';
+}
+
+function isEmail(e){
+  if(!e||!e.includes('@'))return false;
+  const bad=['noreply','no-reply','example.com','godaddy','sentry'];
+  if(bad.some(b=>e.toLowerCase().includes(b)))return false;
+  return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+function cleanUrl(u){
+  if(!u)return'';
+  return u.replace(/^https?:\/\//,'').replace(/\/$/,'').split('?')[0];
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+function buildResults(biz,loc){
+  const tbody=$('tBody');tbody.innerHTML='';
+  allLeads.forEach(r=>{
+    const tr=document.createElement('tr');
+    const webHtml=r.website?`<a href="https://${r.website}" target="_blank" style="color:var(--info);text-decoration:underline">${r.website.slice(0,25)}</a>`:'—';
+    const emailHtml=r.email?`<span style="color:var(--ok)">${r.email}</span>`:'—';
+    tr.innerHTML=`<td style="font-weight:500" title="${r.name}">${r.name}</td><td>${r.phone||'—'}</td><td>${emailHtml}</td><td>${webHtml}</td><td title="${r.address}">${r.address||'—'}</td><td><span class="badge">CALL</span></td>`;
+    tbody.appendChild(tr);
+  });
+  $('resultsTitle').textContent=`${allLeads.length} leads — ${biz} in ${loc}`;
+  $('resultsSub').textContent=`${allLeads.filter(l=>l.phone).length} with phone · ${allLeads.filter(l=>l.email).length} with email`;
+  $('footerNote').textContent=`Real data from Google Maps via Apify · Name · Phone · Email · Website · Address`;
+  show('resultsCard');
+}
+
+function esc(s){return(s||'').replace(/"/g,'""');}
+
+function downloadCSV(){
+  const rows=allLeads.map(r=>`"${esc(r.name)}","${esc(r.email)}","${esc(r.website)}","${esc(r.phone)}","${esc(r.address)}","CALL"`);
+  dl(['Name,Email,Website,Phone,Address,Status',...rows].join('\n'),`leads_${Date.now()}.csv`);
+}
+
+function downloadRetell(){
+  const rows=allLeads.filter(r=>r.phone).map(r=>`"${esc(r.phone)}","${esc(r.name)}","${esc(r.email)}","${esc(r.address)}"`);
+  dl(['phone_number,business_name,email,address',...rows].join('\n'),`retell_${Date.now()}.csv`);
+}
+
+function dl(content,filename){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:'text/csv'}));
+  a.download=filename;a.click();
+}
+
+updateBanner();
+</script>
+</body>
+</html>
