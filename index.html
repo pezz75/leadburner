@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadBurner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0e;--surf:#13131a;--surf2:#1a1a24;--bord:#2a2a38;--acc:#ff4d00;--text:#f0eee8;--muted:#6b6b80;--ok:#22c55e;--info:#378ADD;--mono:'DM Mono',monospace;--head:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh}
+.app{max-width:820px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2rem}
+.logo-icon{width:44px;height:44px;background:var(--acc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.logo-tag{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:13px;font-family:var(--mono);color:var(--muted);line-height:1.7;margin-bottom:2rem}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.75rem;margin-bottom:1rem}
+.fl{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;display:block}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+input[type=text],input[type=number]{background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;height:42px;padding:0 12px;outline:none;transition:border-color .15s;width:100%}
+input:focus{border-color:var(--acc)}
+input::placeholder{color:var(--muted)}
+.count-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pill{background:var(--surf2);border:1px solid var(--bord);border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--muted);padding:5px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.active{background:var(--acc);border-color:var(--acc);color:#fff}
+input#count{width:80px;height:36px}
+.run-btn{width:100%;height:52px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .15s}
+.run-btn:hover{opacity:.88}
+.results-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord);flex-wrap:wrap;gap:10px}
+.results-title{font-size:15px;font-weight:700}
+.results-sub{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer;border:1px solid var(--bord);background:var(--surf2);color:var(--muted);transition:all .15s;white-space:nowrap}
+.dl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;font-family:var(--mono)}
+th{padding:10px 14px;text-align:left;font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);white-space:nowrap}
+td{padding:11px 14px;color:var(--text);border-bottom:1px solid var(--bord)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.search-link{display:inline-flex;align-items:center;gap:5px;color:var(--info);text-decoration:none;font-size:11px;padding:4px 10px;border:1px solid var(--bord);border-radius:6px;background:var(--surf2);transition:all .15s;white-space:nowrap}
+.search-link:hover{border-color:var(--info);background:rgba(55,138,221,.08)}
+.footer-note{font-size:11px;font-family:var(--mono);color:var(--muted);padding:10px 14px;border-top:1px solid var(--bord)}
+.hidden{display:none}
+@media(max-width:600px){.hero h1{font-size:26px}.input-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo-row">
+  <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div>
+    <div class="logo-name">LeadBurner</div>
+    <div class="logo-tag">google search · no api needed</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Find leads.<br><span>Burn the list.</span></h1>
+  <p>Type a business + location. LeadBurner generates direct Google search links for each lead — click to open Google and get real name, phone, email and address. Download as CSV.</p>
+</div>
+
+<div class="card">
+  <div class="input-grid">
+    <div class="field">
+      <label class="fl">Business type</label>
+      <input type="text" id="biz" placeholder="e.g. plumbers, electricians">
+    </div>
+    <div class="field">
+      <label class="fl">Location</label>
+      <input type="text" id="loc" placeholder="e.g. Houston, Texas">
+    </div>
+  </div>
+
+  <label class="fl">Number of leads</label>
+  <div class="count-row">
+    <input type="number" id="count" value="20" min="5" max="100">
+    <span class="pill" onclick="setCount(10,this)">10</span>
+    <span class="pill active" onclick="setCount(20,this)">20</span>
+    <span class="pill" onclick="setCount(30,this)">30</span>
+    <span class="pill" onclick="setCount(50,this)">50</span>
+  </div>
+
+  <button class="run-btn" onclick="generate()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    Burn the list
+  </button>
+</div>
+
+<div id="resultsCard" class="results-card hidden">
+  <div class="results-hdr">
+    <div>
+      <div class="results-title" id="resultsTitle">Results</div>
+      <div class="results-sub">Click any link to open Google — find the real contact details</div>
+    </div>
+    <button class="dl-btn" onclick="downloadCSV()">⬇ Download CSV</button>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Search</th>
+          <th>Find phone</th>
+          <th>Find email</th>
+          <th>Find address</th>
+        </tr>
+      </thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+  <div class="footer-note">Click each link to open Google — copy the details you find back into the CSV</div>
+</div>
+
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const val = id => { const e=$(id); return e?e.value.trim():''; };
+const show = id => $(id).classList.remove('hidden');
+
+let leads = [];
+
+function setCount(n, el) {
+  $('count').value = n;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function generate() {
+  const biz = val('biz');
+  const loc  = val('loc');
+  const count = parseInt(val('count')) || 20;
+  if (!biz) { alert('Enter a business type.'); return; }
+  if (!loc) { alert('Enter a location.'); return; }
+
+  leads = [];
+  const tbody = $('tBody');
+  tbody.innerHTML = '';
+
+  for (let i = 1; i <= count; i++) {
+    const q       = `${biz} ${loc}`;
+    const qEnc    = encodeURIComponent(q);
+    const phoneQ  = encodeURIComponent(`${biz} ${loc} phone number`);
+    const emailQ  = encodeURIComponent(`${biz} ${loc} email contact`);
+    const addrQ   = encodeURIComponent(`${biz} ${loc} address`);
+
+    const mapsUrl  = `https://www.google.com/maps/search/${qEnc}`;
+    const phoneUrl = `https://www.google.com/search?q=${phoneQ}`;
+    const emailUrl = `https://www.google.com/search?q=${emailQ}`;
+    const addrUrl  = `https://www.google.com/search?q=${addrQ}`;
+
+    leads.push({ biz, loc, mapsUrl, phoneUrl, emailUrl, addrUrl });
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:11px">${i}</td>
+      <td><a href="${mapsUrl}" target="_blank" class="search-link">🗺️ ${biz} in ${loc}</a></td>
+      <td><a href="${phoneUrl}" target="_blank" class="search-link">📞 Find phone</a></td>
+      <td><a href="${emailUrl}" target="_blank" class="search-link">📧 Find email</a></td>
+      <td><a href="${addrUrl}" target="_blank" class="search-link">📍 Find address</a></td>`;
+    tbody.appendChild(tr);
+  }
+
+  $('resultsTitle').textContent = `${count} search links — ${biz} in ${loc}`;
+  show('resultsCard');
+}
+
+function downloadCSV() {
+  const biz = val('biz');
+  const loc  = val('loc');
+  const headers = 'Business Type,Location,Google Maps,Find Phone,Find Email,Find Address';
+  const rows = leads.map(l =>
+    `"${l.biz}","${l.loc}","${l.mapsUrl}","${l.phoneUrl}","${l.emailUrl}","${l.addrUrl}"`
+  );
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([[headers,...rows].join('\n')],{type:'text/csv'}));
+  a.download = `${biz.replace(/\s+/g,'_')}_${loc.replace(/\s+/g,'_')}_leads.csv`;
+  a.click();
+}
+</script>
+</body>
+</html>
