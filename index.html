@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LeadBurner</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0c0c0e;--surf:#13131a;--surf2:#1a1a24;--bord:#2a2a38;--acc:#ff4d00;--acc2:#ff8c42;--text:#f0eee8;--muted:#6b6b80;--ok:#22c55e;--info:#378ADD;--warn:#f59e0b;--mono:'DM Mono',monospace;--head:'Syne',sans-serif}
+body{background:var(--bg);color:var(--text);font-family:var(--head);min-height:100vh}
+.app{max-width:900px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:2rem}
+.logo-icon{width:44px;height:44px;background:var(--acc);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.logo-tag{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hero h1{font-size:36px;font-weight:800;line-height:1.1;letter-spacing:-1.5px;margin-bottom:8px}
+.hero h1 span{color:var(--acc)}
+.hero p{font-size:13px;font-family:var(--mono);color:var(--muted);line-height:1.7;margin-bottom:2rem}
+.card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.75rem;margin-bottom:1rem}
+.api-banner{background:rgba(255,77,0,.08);border:1px solid rgba(255,77,0,.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.api-banner.ok{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3)}
+.api-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);flex-shrink:0}
+.api-banner.ok .api-dot{background:var(--ok)}
+.api-text{font-size:12px;font-family:var(--mono);color:var(--muted);flex:1}
+.api-text strong{color:var(--text)}
+.api-text a{color:var(--acc)}
+.api-input-row{display:flex;gap:8px;flex:1;min-width:260px}
+.api-input-row input{flex:1;height:36px;font-size:12px;padding:0 10px;background:var(--surf2);border:1px solid var(--bord);border-radius:8px;color:var(--text);font-family:var(--mono);outline:none}
+.api-input-row input:focus{border-color:var(--acc)}
+.api-save-btn{height:36px;padding:0 14px;background:var(--acc);border:none;border-radius:8px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;white-space:nowrap}
+.fl{font-size:11px;font-weight:500;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;display:block}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+input[type=text],input[type=number],select,textarea{background:var(--surf2);border:1px solid var(--bord);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;height:42px;padding:0 12px;outline:none;transition:border-color .15s;width:100%;-webkit-appearance:none;appearance:none}
+input:focus,select:focus{border-color:var(--acc)}
+input::placeholder{color:var(--muted)}
+select option{background:#1a1a24}
+textarea{height:80px;padding:10px 12px;resize:none;line-height:1.6}
+.batch-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer;user-select:none}
+.tog-track{width:36px;height:20px;background:var(--surf2);border:1px solid var(--bord);border-radius:99px;position:relative;transition:background .2s;flex-shrink:0}
+.tog-track.on{background:var(--acc);border-color:var(--acc)}
+.tog-thumb{position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s}
+.tog-track.on .tog-thumb{left:18px}
+.tog-lbl{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.tog-lbl span{color:var(--acc2)}
+.count-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.pill{background:var(--surf2);border:1px solid var(--bord);border-radius:99px;font-size:11px;font-family:var(--mono);color:var(--muted);padding:5px 13px;cursor:pointer;transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--acc);color:var(--acc)}
+.pill.active{background:var(--acc);border-color:var(--acc);color:#fff}
+input#count{width:80px;height:36px}
+.run-btn{width:100%;height:52px;background:var(--acc);border:none;border-radius:12px;color:#fff;font-family:var(--head);font-size:16px;font-weight:800;letter-spacing:-.3px;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:10px}
+.run-btn:hover{opacity:.88}
+.run-btn:active{transform:scale(.985)}
+.run-btn:disabled{opacity:.3;cursor:not-allowed}
+.progress-wrap{margin-top:1.5rem}
+.prog-hdr{display:flex;justify-content:space-between;margin-bottom:10px}
+.prog-lbl{font-size:12px;font-family:var(--mono);color:var(--muted)}
+.prog-pct{font-size:12px;font-family:var(--mono);color:var(--acc);font-weight:500}
+.prog-track{height:3px;background:var(--surf2);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.prog-fill{height:100%;background:var(--acc);border-radius:99px;transition:width .5s}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.metric{background:var(--surf2);border-radius:10px;padding:12px 14px}
+.metric-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.metric-val{font-size:24px;font-weight:800;letter-spacing:-1px}
+.metric-sub{font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.log{background:var(--bg);border:1px solid var(--bord);border-radius:10px;padding:10px 12px;font-family:var(--mono);font-size:11px;height:80px;overflow-y:auto;margin-bottom:12px;line-height:1.7}
+.log-line{color:var(--muted)}.log-ok{color:var(--ok)}.log-warn{color:var(--warn)}.log-info{color:var(--info)}
+.batch-queue{margin-bottom:12px}
+.bq-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surf2);border-radius:8px;margin-bottom:6px;font-size:12px;font-family:var(--mono)}
+.bq-name{flex:1;color:var(--text)}
+.bq-status{font-size:11px;padding:2px 10px;border-radius:99px}
+.bqs-pending{background:var(--surf);color:var(--muted)}
+.bqs-running{background:rgba(255,77,0,.15);color:var(--acc)}
+.bqs-done{background:rgba(34,197,94,.1);color:var(--ok)}
+.bqs-error{background:rgba(239,68,68,.1);color:#ef4444}
+.bq-count{font-size:11px;color:var(--muted)}
+.suggest-row{margin-bottom:10px}
+.suggest-lbl{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:7px}
+.stags{display:flex;flex-wrap:wrap;gap:6px}
+.stag{font-size:11px;font-family:var(--mono);padding:4px 11px;border:1px solid var(--bord);border-radius:99px;color:var(--muted);cursor:pointer;background:var(--surf2);transition:all .15s}
+.stag:hover{border-color:var(--acc);color:var(--acc)}
+.stag.added{border-color:var(--ok);color:var(--ok)}
+.city-count{font-size:11px;font-family:var(--mono);color:var(--acc2);margin-top:5px}
+.preview-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.preview-inner{padding:1.25rem 1.5rem}
+.preview-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+.pstat{background:var(--surf2);border-radius:10px;padding:12px 14px;text-align:center}
+.pstat-val{font-size:22px;font-weight:800;letter-spacing:-1px;margin-bottom:3px}
+.pstat-lbl{font-size:10px;font-family:var(--mono);color:var(--muted);line-height:1.4}
+.g{color:var(--ok)}.o{color:var(--acc2)}.b{color:var(--info)}
+.bar-wrap{margin-bottom:8px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:4px}
+.bar-track{height:4px;background:var(--surf2);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px}
+.camp-note{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:6px}
+.camp-note span{color:var(--acc2)}
+.results-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;overflow:hidden;margin-top:1rem}
+.results-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord);flex-wrap:wrap;gap:10px}
+.results-title{font-size:15px;font-weight:700}
+.results-sub{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:3px}
+.dl-group{display:flex;gap:8px;flex-wrap:wrap}
+.dl-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:11px;font-family:var(--mono);cursor:pointer;border:1px solid var(--bord);background:var(--surf2);color:var(--muted);transition:all .15s;white-space:nowrap}
+.dl-btn:hover{border-color:var(--acc);color:var(--acc)}
+.dl-btn.retell{border-color:#534AB7;color:#AFA9EC}
+.dl-btn.retell:hover{background:rgba(83,74,183,.15)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+th{padding:9px 14px;text-align:left;font-weight:500;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--bord);white-space:nowrap}
+td{padding:10px 14px;color:var(--text);border-bottom:1px solid var(--bord);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surf2)}
+.badge-call{font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(34,197,94,.1);color:var(--ok)}
+.footer-note{font-size:11px;font-family:var(--mono);color:var(--muted);padding:10px 14px;border-top:1px solid var(--bord)}
+.hist-card{background:var(--surf);border:1px solid var(--bord);border-radius:16px;padding:1.25rem 1.5rem;margin-top:1rem}
+.hist-title{font-size:11px;font-weight:700;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:1rem}
+.hist-empty{font-size:12px;font-family:var(--mono);color:var(--muted);text-align:center;padding:.5rem 0}
+.hist-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surf2);border-radius:10px;margin-bottom:6px}
+.hi-info{flex:1;min-width:0}
+.hi-q{font-size:12px;font-family:var(--mono);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi-m{font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px}
+.hi-c{font-size:11px;font-family:var(--mono);color:var(--acc2);white-space:nowrap}
+.hi-r{font-size:10px;font-family:var(--mono);color:var(--muted);padding:4px 10px;border:1px solid var(--bord);border-radius:99px;cursor:pointer;background:none;transition:all .15s;flex-shrink:0}
+.hi-r:hover{border-color:var(--acc);color:var(--acc)}
+.hidden{display:none}
+@media(max-width:600px){.hero h1{font-size:26px}.input-grid{grid-template-columns:1fr}.metrics{grid-template-columns:1fr 1fr}.preview-stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="logo-row">
+  <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+  <div>
+    <div class="logo-name">LeadBurner</div>
+    <div class="logo-tag">powered by apify · real google maps data</div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Real leads.<br><span>Burn the list.</span></h1>
+  <p>Real Google Maps data — business name, phone, email, website, address. Exports in the same format as your Apify file. Ready for Retell.</p>
+</div>
+
+<div class="card">
+
+  <div class="api-banner" id="apiBanner">
+    <div class="api-dot"></div>
+    <div class="api-text"><strong>Apify API token required</strong> — get it at <a href="https://console.apify.com/account/integrations" target="_blank">console.apify.com → Settings → Integrations</a></div>
+    <div class="api-input-row">
+      <input type="password" id="apiKeyInput" placeholder="Paste your Apify token..." autocomplete="off">
+      <button class="api-save-btn" onclick="saveKey()">Connect</button>
+    </div>
+  </div>
+
+  <div class="input-grid">
+    <div class="field">
+      <label class="fl">Business type</label>
+      <input type="text" id="biz" placeholder="e.g. plumbers, electricians, dentists">
+    </div>
+    <div class="field">
+      <label class="fl">Location</label>
+      <input type="text" id="loc" placeholder="e.g. Houston, Texas">
+    </div>
+  </div>
+
+  <div class="batch-row" onclick="toggleBatch()">
+    <div class="tog-track" id="togTrack"><div class="tog-thumb"></div></div>
+    <div class="tog-lbl">City batch mode <span>— scrape multiple cities at once</span></div>
+  </div>
+  <div id="batchBody" class="hidden">
+    <div class="input-grid" style="margin-bottom:10px">
+      <div class="field">
+        <label class="fl">State or city to expand</label>
+        <input type="text" id="batchSeed" placeholder="e.g. Texas, Florida, Houston..." oninput="onSeedInput(this.value)">
+      </div>
+      <div class="field" style="justify-content:flex-end">
+        <div style="height:21px"></div>
+        <button onclick="autoFill()" style="height:42px;background:var(--acc);border:none;border-radius:10px;color:#fff;font-family:var(--mono);font-size:12px;cursor:pointer;padding:0 16px">Auto-fill cities</button>
+      </div>
+    </div>
+    <div id="suggestArea" class="hidden suggest-row">
+      <div class="suggest-lbl">Click to add cities:</div>
+      <div class="stags" id="suggestTags"></div>
+    </div>
+    <label class="fl">Cities (one per line)</label>
+    <textarea id="cityList" placeholder="Houston, Texas&#10;Dallas, Texas&#10;Austin, Texas" oninput="updateCityCount()"></textarea>
+    <div class="city-count" id="cityCount"></div>
+  </div>
+
+  <label class="fl" style="margin-top:16px">Results per city</label>
+  <div class="count-row">
+    <input type="number" id="count" value="50" min="10" max="200">
+    <span class="pill" onclick="setCount(25,this)">25</span>
+    <span class="pill active" onclick="setCount(50,this)">50</span>
+    <span class="pill" onclick="setCount(100,this)">100</span>
+    <span class="pill" onclick="setCount(200,this)">200</span>
+  </div>
+
+  <button class="run-btn" id="runBtn" onclick="startScrape()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    <span id="btnLabel">Burn the list</span>
+  </button>
+
+  <div id="progressWrap" class="hidden progress-wrap">
+    <div class="prog-hdr">
+      <span class="prog-lbl" id="progLbl">Starting...</span>
+      <span class="prog-pct" id="progPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    <div id="batchQueue" class="hidden batch-queue"></div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-lbl">Found</div><div class="metric-val" id="mFound">0</div><div class="metric-sub">businesses</div></div>
+      <div class="metric"><div class="metric-lbl">With email</div><div class="metric-val" id="mEmail">0</div><div class="metric-sub">found</div></div>
+      <div class="metric"><div class="metric-lbl">With website</div><div class="metric-val" id="mWeb">0</div><div class="metric-sub">found</div></div>
+      <div class="metric"><div class="metric-lbl">Time</div><div class="metric-val" id="mTime">0s</div><div class="metric-sub">elapsed</div></div>
+    </div>
+    <div class="log" id="logBox"></div>
+  </div>
+</div>
+
+<div id="previewCard" class="preview-card hidden">
+  <div class="preview-inner">
+    <div style="font-size:13px;font-weight:700;margin-bottom:1rem" id="previewTitle">Campaign preview</div>
+    <div class="preview-stats" id="previewStats"></div>
+    <div id="scoreBars"></div>
+  </div>
+</div>
+
+<div id="resultsCard" class="results-card hidden">
+  <div class="results-hdr">
+    <div>
+      <div class="results-title" id="resultsTitle">Results</div>
+      <div class="results-sub" id="resultsSub"></div>
+    </div>
+    <div class="dl-group">
+      <button class="dl-btn" onclick="downloadCSV()">⬇ Download CSV</button>
+      <button class="dl-btn retell" onclick="downloadRetell()">⬇ Retell CSV</button>
+    </div>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Website</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+  <div class="footer-note" id="footerNote"></div>
+</div>
+
+<div class="hist-card">
+  <div class="hist-title">⏱ Search history</div>
+  <div id="histList"></div>
+</div>
+
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const val = id => { const e=$(id); return e?e.value.trim():''; };
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+
+let apiKey = localStorage.getItem('lb_apify_key')||'';
+let allLeads = [];
+let batchMode = false;
+let elapsed = 0;
+let elapsedTimer = null;
+let history = JSON.parse(localStorage.getItem('lb_hist5')||'[]');
+
+// ── API Key ──────────────────────────────────────────────────────────────────
+function saveKey() {
+  const k = val('apiKeyInput');
+  if (!k) { alert('Paste your Apify token first.'); return; }
+  apiKey = k;
+  localStorage.setItem('lb_apify_key', k);
+  updateBanner();
+}
+
+function updateBanner() {
+  const b = $('apiBanner');
+  if (apiKey) {
+    b.className = 'api-banner ok';
+    b.innerHTML = `<div class="api-dot"></div><div class="api-text"><strong>Connected to Apify</strong> — real Google Maps scraping enabled</div><button onclick="clearKey()" style="height:32px;padding:0 12px;background:transparent;border:1px solid var(--bord);border-radius:8px;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer">Change token</button>`;
+  } else {
+    b.className = 'api-banner';
+    b.innerHTML = `<div class="api-dot"></div><div class="api-text"><strong>Apify API token required</strong> — get it at <a href="https://console.apify.com/account/integrations" target="_blank">console.apify.com → Settings → Integrations</a></div><div class="api-input-row"><input type="password" id="apiKeyInput" placeholder="Paste your Apify token..." autocomplete="off"><button class="api-save-btn" onclick="saveKey()">Connect</button></div>`;
+  }
+}
+
+function clearKey() {
+  apiKey = '';
+  localStorage.removeItem('lb_apify_key');
+  updateBanner();
+}
+
+// ── Count pills ──────────────────────────────────────────────────────────────
+function setCount(n, el) {
+  $('count').value = n;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Batch mode ───────────────────────────────────────────────────────────────
+const CITIES = {
+  'texas':['Houston, Texas','San Antonio, Texas','Dallas, Texas','Austin, Texas','Fort Worth, Texas','El Paso, Texas','Arlington, Texas','Corpus Christi, Texas','Plano, Texas','Lubbock, Texas','Garland, Texas','Irving, Texas','Amarillo, Texas','Pasadena, Texas','McKinney, Texas'],
+  'florida':['Jacksonville, Florida','Miami, Florida','Tampa, Florida','Orlando, Florida','St. Petersburg, Florida','Hialeah, Florida','Tallahassee, Florida','Fort Lauderdale, Florida','Pembroke Pines, Florida','Hollywood, Florida','Gainesville, Florida','Coral Springs, Florida','Cape Coral, Florida'],
+  'california':['Los Angeles, California','San Diego, California','San Jose, California','San Francisco, California','Fresno, California','Sacramento, California','Long Beach, California','Oakland, California','Bakersfield, California','Anaheim, California','Santa Ana, California','Riverside, California'],
+  'new york':['New York City, New York','Buffalo, New York','Rochester, New York','Yonkers, New York','Syracuse, New York','Albany, New York'],
+  'illinois':['Chicago, Illinois','Aurora, Illinois','Joliet, Illinois','Naperville, Illinois','Rockford, Illinois','Springfield, Illinois'],
+  'georgia':['Atlanta, Georgia','Augusta, Georgia','Columbus, Georgia','Savannah, Georgia','Athens, Georgia'],
+  'north carolina':['Charlotte, North Carolina','Raleigh, North Carolina','Greensboro, North Carolina','Durham, North Carolina','Winston-Salem, North Carolina'],
+  'ohio':['Columbus, Ohio','Cleveland, Ohio','Cincinnati, Ohio','Toledo, Ohio','Akron, Ohio','Dayton, Ohio'],
+  'arizona':['Phoenix, Arizona','Tucson, Arizona','Mesa, Arizona','Chandler, Arizona','Scottsdale, Arizona','Glendale, Arizona'],
+  'washington':['Seattle, Washington','Spokane, Washington','Tacoma, Washington','Vancouver, Washington','Bellevue, Washington'],
+  'colorado':['Denver, Colorado','Colorado Springs, Colorado','Aurora, Colorado','Fort Collins, Colorado','Lakewood, Colorado'],
+  'nevada':['Las Vegas, Nevada','Henderson, Nevada','Reno, Nevada','North Las Vegas, Nevada'],
+  'tennessee':['Nashville, Tennessee','Memphis, Tennessee','Knoxville, Tennessee','Chattanooga, Tennessee'],
+  'virginia':['Virginia Beach, Virginia','Norfolk, Virginia','Chesapeake, Virginia','Richmond, Virginia'],
+  'michigan':['Detroit, Michigan','Grand Rapids, Michigan','Warren, Michigan','Ann Arbor, Michigan'],
+  'pennsylvania':['Philadelphia, Pennsylvania','Pittsburgh, Pennsylvania','Allentown, Pennsylvania','Erie, Pennsylvania'],
+  'massachusetts':['Boston, Massachusetts','Worcester, Massachusetts','Springfield, Massachusetts','Lowell, Massachusetts'],
+  'louisiana':['New Orleans, Louisiana','Baton Rouge, Louisiana','Shreveport, Louisiana','Lafayette, Louisiana'],
+  'missouri':['Kansas City, Missouri','Saint Louis, Missouri','Springfield, Missouri','Columbia, Missouri'],
+  'houston':['Houston, Texas','Sugar Land, Texas','Pasadena, Texas','The Woodlands, Texas','Katy, Texas','Pearland, Texas','League City, Texas','Baytown, Texas','Missouri City, Texas','Conroe, Texas'],
+  'dallas':['Dallas, Texas','Fort Worth, Texas','Arlington, Texas','Plano, Texas','Garland, Texas','Irving, Texas','Grand Prairie, Texas','Mesquite, Texas','Carrollton, Texas','Frisco, Texas'],
+  'miami':['Miami, Florida','Hialeah, Florida','Fort Lauderdale, Florida','Pembroke Pines, Florida','Hollywood, Florida','Coral Springs, Florida','West Palm Beach, Florida'],
+  'los angeles':['Los Angeles, California','Long Beach, California','Anaheim, California','Santa Ana, California','Irvine, California','Glendale, California','Huntington Beach, California'],
+  'chicago':['Chicago, Illinois','Aurora, Illinois','Naperville, Illinois','Joliet, Illinois','Evanston, Illinois','Schaumburg, Illinois'],
+  'phoenix':['Phoenix, Arizona','Mesa, Arizona','Scottsdale, Arizona','Chandler, Arizona','Tempe, Arizona','Gilbert, Arizona','Glendale, Arizona'],
+  'atlanta':['Atlanta, Georgia','Sandy Springs, Georgia','Roswell, Georgia','Marietta, Georgia','Smyrna, Georgia','Alpharetta, Georgia'],
+  'seattle':['Seattle, Washington','Bellevue, Washington','Tacoma, Washington','Renton, Washington','Kirkland, Washington','Redmond, Washington'],
+  'denver':['Denver, Colorado','Aurora, Colorado','Lakewood, Colorado','Thornton, Colorado','Arvada, Colorado','Westminster, Colorado'],
+  'las vegas':['Las Vegas, Nevada','Henderson, Nevada','North Las Vegas, Nevada','Paradise, Nevada'],
+  'austin':['Austin, Texas','Round Rock, Texas','Cedar Park, Texas','Georgetown, Texas','Pflugerville, Texas','San Marcos, Texas'],
+  'san antonio':['San Antonio, Texas','New Braunfels, Texas','Schertz, Texas','Universal City, Texas','Converse, Texas'],
+};
+
+function getCities(seed) {
+  const k = seed.toLowerCase().replace(/[^a-z ]/g,'').trim();
+  if (CITIES[k]) return CITIES[k];
+  for (const key of Object.keys(CITIES)) {
+    if (k.includes(key)||key.includes(k)) return CITIES[key];
+  }
+  return null;
+}
+
+function toggleBatch() {
+  batchMode = !batchMode;
+  $('togTrack').classList.toggle('on', batchMode);
+  batchMode ? show('batchBody') : hide('batchBody');
+  const l=$('loc'); if(l) l.style.opacity=batchMode?'.4':'1';
+  if(batchMode){const v=val('loc');if(v){$('batchSeed').value=v;onSeedInput(v);}}
+}
+
+function onSeedInput(v) {
+  if(v.length<2){hide('suggestArea');return;}
+  const cities=getCities(v); if(!cities){hide('suggestArea');return;}
+  const tags=$('suggestTags'); tags.innerHTML='';
+  cities.forEach(city=>{
+    const t=document.createElement('span'); t.className='stag'; t.textContent=city;
+    t.onclick=()=>{
+      const box=$('cityList');
+      const ex=box.value.trim().split('\n').filter(Boolean);
+      if(!ex.includes(city)){box.value=[...ex,city].join('\n');updateCityCount();}
+      t.classList.add('added');
+    };
+    tags.appendChild(t);
+  });
+  show('suggestArea');
+}
+
+function autoFill() {
+  const seed=val('batchSeed');
+  if(!seed){alert('Type a state or city first.');return;}
+  const cities=getCities(seed);
+  if(!cities){alert(`No cities found for "${seed}". Try a US state like "Texas" or city like "Houston".`);return;}
+  $('cityList').value=cities.join('\n');
+  updateCityCount(); hide('suggestArea');
+}
+
+function updateCityCount() {
+  const lines=$('cityList').value.trim().split('\n').filter(Boolean);
+  $('cityCount').textContent=lines.length>0?`${lines.length} cities queued`:'';
+}
+
+// ── Logging ──────────────────────────────────────────────────────────────────
+function log(msg, type) {
+  const box=$('logBox');
+  const d=document.createElement('div');
+  d.className='log-line'+(type==='ok'?' log-ok':type==='warn'?' log-warn':type==='info'?' log-info':'');
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  d.textContent=`[${ts}] ${msg}`;
+  box.appendChild(d); box.scrollTop=box.scrollHeight;
+}
+
+function setProgress(lbl, pct) {
+  $('progLbl').textContent=lbl;
+  $('progPct').textContent=Math.round(pct)+'%';
+  $('progFill').style.width=pct+'%';
+}
+
+// ── Apify API call (async mode — no timeout issues) ─────────────────────────
+async function callApify(keyword, location, limit) {
+  // Step 1: Start the run asynchronously
+  log('Starting Apify run...', 'info');
+  const startUrl = `https://api.apify.com/v2/acts/compass~crawler-google-places/runs?token=${apiKey}`;
+
+  const body = {
+    searchStringsArray: [`${keyword} in ${location}`],
+    maxCrawledPlacesPerSearch: limit,
+    language: 'en',
+    countryCode: 'us',
+    maxImages: 0,
+    maxReviews: 0,
+    scrapeContacts: true
+  };
+
+  const startRes = await fetch(startUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!startRes.ok) {
+    const err = await startRes.text();
+    throw new Error(`Apify start error ${startRes.status}: ${err.slice(0,200)}`);
+  }
+
+  const startData = await startRes.json();
+  const runId = startData.data?.id;
+  if (!runId) throw new Error('No run ID returned from Apify');
+
+  log(`Run started (ID: ${runId}) — waiting for results...`, 'ok');
+
+  // Step 2: Poll until finished
+  let attempts = 0;
+  const maxAttempts = 60; // 5 mins max (5s intervals)
+
+  while (attempts < maxAttempts) {
+    await new Promise(r => setTimeout(r, 5000)); // wait 5s
+    attempts++;
+
+    const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`);
+    const statusData = await statusRes.json();
+    const status = statusData.data?.status;
+
+    const pct = 30 + Math.round((attempts / maxAttempts) * 60);
+    setProgress(`Scraping Google Maps... (${attempts * 5}s elapsed)`, Math.min(pct, 89));
+    log(`Status: ${status} — ${attempts * 5}s elapsed`);
+
+    if (status === 'SUCCEEDED') {
+      log('Scrape complete — fetching results...', 'ok');
+      break;
+    }
+    if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') {
+      throw new Error(`Apify run ${status}`);
+    }
+  }
+
+  if (attempts >= maxAttempts) throw new Error('Apify run timed out after 5 minutes');
+
+  // Step 3: Fetch dataset results
+  const datasetId = (await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${apiKey}`).then(r=>r.json())).data?.defaultDatasetId;
+  const itemsRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?token=${apiKey}&format=json&limit=${limit}`);
+  const items = await itemsRes.json();
+
+  const raw = Array.isArray(items) ? items : (items.items || []);
+  log(`Got ${raw.length} results from Apify`, 'ok');
+
+  return raw.map(r => ({
+    name:    r.title || r.name || '',
+    email:   extractEmail(r),
+    website: cleanUrl(r.website || r.url || ''),
+    phone:   formatPhone(r.phone || r.phoneUnformatted || ''),
+    address: r.address || r.street || '',
+    status:  'CALL'
+  })).filter(r => r.name);
+}
+
+function extractEmail(r) {
+  if (r.emails && Array.isArray(r.emails) && r.emails.length > 0) {
+    const e = r.emails[0];
+    const val = typeof e === 'string' ? e : (e.email || e.value || '');
+    return isGoodEmail(val) ? val : '';
+  }
+  if (r.email && isGoodEmail(r.email)) return r.email;
+  if (r.contacts && Array.isArray(r.contacts)) {
+    const ec = r.contacts.find(c => c.type === 'email');
+    if (ec && isGoodEmail(ec.value)) return ec.value;
+  }
+  return '';
+}
+
+function isGoodEmail(e) {
+  if (!e || !e.includes('@')) return false;
+  const bad = ['noreply','no-reply','donotreply','example.com','godaddy.com','sentry.io','#ERROR'];
+  if (bad.some(b => e.toLowerCase().includes(b))) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+function formatPhone(raw) {
+  if (!raw) return '';
+  const d = raw.replace(/\D/g,'');
+  if (d.length===10) return `+1${d}`;
+  if (d.length===11 && d[0]==='1') return `+${d}`;
+  if (d.length>10) return `+${d}`;
+  return raw;
+}
+
+function cleanUrl(url) {
+  if (!url) return '';
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '').split('?')[0];
+}
+
+// ── Main scrape ──────────────────────────────────────────────────────────────
+async function startScrape() {
+  if (!apiKey) { alert('Please connect your Apify token first.'); return; }
+  const biz = val('biz'); const loc = val('loc');
+  const count = parseInt(val('count'))||50;
+  if (!biz) { alert('Enter a business type.'); return; }
+
+  let cities = [];
+  if (batchMode) {
+    const raw = $('cityList').value.trim();
+    if (!raw) { alert('Add at least one city.'); return; }
+    cities = raw.split('\n').map(s=>s.trim()).filter(Boolean);
+  } else {
+    if (!loc) { alert('Enter a location.'); return; }
+    cities = [loc];
+  }
+
+  $('runBtn').disabled = true;
+  $('btnLabel').textContent = 'Running...';
+  show('progressWrap');
+  hide('previewCard'); hide('resultsCard');
+  $('logBox').innerHTML = '';
+  allLeads = []; elapsed = 0;
+  clearInterval(elapsedTimer);
+  elapsedTimer = setInterval(()=>{ elapsed++; $('mTime').textContent=elapsed+'s'; }, 1000);
+  ['mFound','mEmail','mWeb'].forEach(id=>$(id).textContent='0');
+
+  cities.length > 1 ? await runBatch(biz, cities, count) : await runSingle(biz, cities[0], count);
+}
+
+async function runSingle(biz, city, count) {
+  hide('batchQueue');
+  log(`Searching for "${biz}" in ${city}...`, 'info');
+  setProgress('Calling Apify — scraping Google Maps live...', 10);
+
+  try {
+    log('Apify is scraping Google Maps — this takes 1-3 minutes...');
+    setProgress('Scraping Google Maps...', 30);
+    const leads = await callApify(biz, city, count);
+    allLeads = leads;
+    updateMetrics();
+    setProgress('Complete!', 100);
+    log(`Done — ${leads.length} real leads from Google Maps`, 'ok');
+    log(`${leads.filter(l=>l.email).length} with email · ${leads.filter(l=>l.website).length} with website`, 'ok');
+  } catch(err) {
+    log(`Error: ${err.message}`, 'warn');
+    setProgress('Error', 0);
+    alert(`Error: ${err.message}`);
+    resetBtn(); clearInterval(elapsedTimer); return;
+  }
+
+  clearInterval(elapsedTimer);
+  saveHistory(biz, [city], allLeads.length);
+  buildPreview();
+  buildResults(biz, city);
+  resetBtn();
+}
+
+async function runBatch(biz, cities, count) {
+  const qwrap = $('batchQueue'); show('batchQueue'); qwrap.innerHTML = '';
+  cities.forEach((city,i)=>{
+    const row=document.createElement('div'); row.className='bq-row';
+    row.innerHTML=`<span class="bq-name">${city}</span><span class="bq-status bqs-pending" id="bqs-${i}">Pending</span><span class="bq-count" id="bqc-${i}"></span>`;
+    qwrap.appendChild(row);
+  });
+
+  const seen = new Set();
+  for (let i=0; i<cities.length; i++) {
+    const city=cities[i];
+    $(`bqs-${i}`).textContent='Running'; $(`bqs-${i}`).className='bq-status bqs-running';
+    log(`City ${i+1}/${cities.length}: ${city}`, 'info');
+    setProgress(`Scraping ${city}...`, (i/cities.length)*100);
+    try {
+      const cityLeads = await callApify(biz, city, count);
+      let added=0;
+      cityLeads.forEach(l=>{
+        const key=l.phone||(l.name+l.address);
+        if(!seen.has(key)){seen.add(key);allLeads.push(l);added++;}
+      });
+      $(`bqs-${i}`).textContent='Done'; $(`bqs-${i}`).className='bq-status bqs-done';
+      $(`bqc-${i}`).textContent=`${added} leads`;
+      log(`${city} — ${added} leads`, 'ok');
+      updateMetrics();
+      if(i<cities.length-1) await new Promise(r=>setTimeout(r,1000));
+    } catch(err) {
+      $(`bqs-${i}`).textContent='Error'; $(`bqs-${i}`).className='bq-status bqs-error';
+      log(`${city} failed: ${err.message}`, 'warn');
+    }
+  }
+
+  setProgress('All cities complete!', 100);
+  log(`Done: ${allLeads.length} total leads`, 'ok');
+  clearInterval(elapsedTimer);
+  saveHistory(biz, cities, allLeads.length);
+  buildPreview(); buildResults(biz, cities.join(', ')); resetBtn();
+}
+
+function updateMetrics() {
+  $('mFound').textContent = allLeads.length;
+  $('mEmail').textContent = allLeads.filter(l=>l.email).length;
+  $('mWeb').textContent   = allLeads.filter(l=>l.website).length;
+}
+
+function resetBtn() {
+  $('runBtn').disabled=false;
+  $('btnLabel').textContent='Run again';
+}
+
+// ── Preview ──────────────────────────────────────────────────────────────────
+function buildPreview() {
+  const total=allLeads.length; if(!total){hide('previewCard');return;}
+  const withEmail=allLeads.filter(l=>l.email).length;
+  const withWeb=allLeads.filter(l=>l.website).length;
+  const withPhone=allLeads.filter(l=>l.phone).length;
+  const retellMins=Math.round(withPhone*.75*1.5);
+
+  $('previewStats').innerHTML=`
+    <div class="pstat"><div class="pstat-val">${total.toLocaleString()}</div><div class="pstat-lbl">Total leads</div></div>
+    <div class="pstat"><div class="pstat-val g">${withEmail.toLocaleString()}</div><div class="pstat-lbl">With email<br>${Math.round(withEmail/total*100)}%</div></div>
+    <div class="pstat"><div class="pstat-val o">${withPhone.toLocaleString()}</div><div class="pstat-lbl">With phone<br>${Math.round(withPhone/total*100)}%</div></div>
+    <div class="pstat"><div class="pstat-val b">~${Math.floor(retellMins/60)}h ${retellMins%60}m</div><div class="pstat-lbl">Est. Retell<br>campaign</div></div>`;
+
+  $('scoreBars').innerHTML=`
+    <div class="bar-wrap">
+      <div class="bar-lbl"><span>Email coverage</span><span>${Math.round(withEmail/total*100)}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(withEmail/total*100)}%;background:var(--ok)"></div></div>
+    </div>
+    <div class="bar-wrap">
+      <div class="bar-lbl"><span>Website coverage</span><span>${Math.round(withWeb/total*100)}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(withWeb/total*100)}%;background:var(--info)"></div></div>
+    </div>
+    <div class="camp-note">Retell campaign est: <span>~${Math.floor(retellMins/60)}h ${retellMins%60}m</span> · ${withPhone} leads have phone numbers</div>`;
+
+  $('previewTitle').textContent=`Campaign preview — ${total.toLocaleString()} real leads`;
+  show('previewCard');
+}
+
+// ── Results table ────────────────────────────────────────────────────────────
+function buildResults(biz, location) {
+  const tbody=$('tBody'); tbody.innerHTML='';
+  const preview=Math.min(15, allLeads.length);
+
+  for(let i=0;i<preview;i++){
+    const r=allLeads[i];
+    const tr=document.createElement('tr');
+    const websiteHtml = r.website
+      ? `<a href="https://${r.website}" target="_blank" style="color:var(--info);text-decoration:underline">${r.website.slice(0,30)}</a>`
+      : '<span style="color:var(--muted)">—</span>';
+    const emailHtml = r.email
+      ? `<span style="color:var(--ok)">${r.email}</span>`
+      : '<span style="color:var(--muted)">—</span>';
+
+    tr.innerHTML=`
+      <td style="font-weight:500" title="${r.name}">${r.name}</td>
+      <td>${emailHtml}</td>
+      <td>${websiteHtml}</td>
+      <td style="font-family:var(--mono)">${r.phone||'—'}</td>
+      <td title="${r.address}">${r.address||'—'}</td>
+      <td><span class="badge-call">CALL</span></td>`;
+    tbody.appendChild(tr);
+  }
+
+  $('resultsTitle').textContent=`${allLeads.length.toLocaleString()} real leads — ${biz}`;
+  $('resultsSub').textContent=`${location} · showing ${preview} of ${allLeads.length} · real data from Google Maps`;
+  $('footerNote').textContent=`Name · Email · Website · Phone · Address · Status — same format as your Apify exports`;
+  show('resultsCard');
+}
+
+// ── CSV Export ───────────────────────────────────────────────────────────────
+function slug() { return val('biz').replace(/[^a-z0-9]/gi,'_').toLowerCase()||'leads'; }
+
+function downloadCSV() {
+  const headers = 'Name,Email,Website,Phone,Address,Status';
+  const rows = allLeads.map(r =>
+    `"${esc(r.name)}","${esc(r.email)}","${esc(r.website)}","${esc(r.phone)}","${esc(r.address)}","${esc(r.status)}"`
+  );
+  trigger([headers,...rows].join('\n'), `${slug()}_leads_${Date.now()}.csv`);
+}
+
+function downloadRetell() {
+  // Retell format — phone_number in E.164 + dynamic variables
+  const headers = 'phone_number,business_name,email,address,website,status';
+  const rows = allLeads
+    .filter(r => r.phone) // Retell needs a phone number
+    .map(r =>
+      `"${esc(r.phone)}","${esc(r.name)}","${esc(r.email)}","${esc(r.address)}","${esc(r.website)}","${esc(r.status)}"`
+    );
+  trigger([headers,...rows].join('\n'), `${slug()}_RETELL_${Date.now()}.csv`);
+}
+
+function esc(s) { return (s||'').replace(/"/g,'""'); }
+
+function trigger(content, filename) {
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:'text/csv'}));
+  a.download=filename; a.click();
+}
+
+// ── History ──────────────────────────────────────────────────────────────────
+function saveHistory(biz, cities, count) {
+  history.unshift({biz,cities,count,ts:Date.now()});
+  if(history.length>10) history=history.slice(0,10);
+  localStorage.setItem('lb_hist5', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const list=$('histList'); list.innerHTML='';
+  if(!history.length){list.innerHTML='<div class="hist-empty">No searches yet</div>';return;}
+  history.forEach((item,idx)=>{
+    const div=document.createElement('div'); div.className='hist-item';
+    div.innerHTML=`
+      <div class="hi-info">
+        <div class="hi-q">🗺️ ${item.biz} · ${item.cities.join(', ')}</div>
+        <div class="hi-m">${timeAgo(item.ts)}</div>
+      </div>
+      <div class="hi-c">${item.count.toLocaleString()} leads</div>
+      <button class="hi-r" onclick="rerun(${idx})">Re-run</button>`;
+    list.appendChild(div);
+  });
+}
+
+function rerun(idx) {
+  const item=history[idx];
+  $('biz').value=item.biz;
+  if(item.cities.length===1){
+    $('loc').value=item.cities[0];
+    if(batchMode) toggleBatch();
+  } else {
+    if(!batchMode) toggleBatch();
+    $('cityList').value=item.cities.join('\n');
+    updateCityCount();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function timeAgo(ts) {
+  const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1) return 'just now';
+  if(m<60) return `${m}m ago`;
+  const h=Math.floor(m/60);
+  if(h<24) return `${h}h ago`;
+  return `${Math.floor(h/24)}d ago`;
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+updateBanner();
+renderHistory();
+</script>
+</body>
+</html>
